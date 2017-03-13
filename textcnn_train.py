@@ -5,8 +5,8 @@ import numpy as np
 import os
 import time
 import datetime
-import data_helpers
-from text_cnn import TextCNN
+import textcnn_datahelpers
+from textcnn import TextCNN
 from tensorflow.contrib import learn
 import yaml
 
@@ -58,19 +58,19 @@ else:
 print("Loading data...")
 datasets = None
 if dataset_name == "mrpolarity":
-    datasets = data_helpers.get_datasets_mrpolarity(cfg["datasets"][dataset_name]["positive_data_file"]["path"],
+    datasets = textcnn_datahelpers.get_datasets_mrpolarity(cfg["datasets"][dataset_name]["positive_data_file"]["path"],
                                                     cfg["datasets"][dataset_name]["negative_data_file"]["path"])
 elif dataset_name == "20newsgroup":
-    datasets = data_helpers.get_datasets_20newsgroup(subset="train",
+    datasets = textcnn_datahelpers.get_datasets_20newsgroup(subset="train",
                                                      categories=cfg["datasets"][dataset_name]["categories"],
                                                      shuffle=cfg["datasets"][dataset_name]["shuffle"],
                                                      random_state=cfg["datasets"][dataset_name]["random_state"])
 elif dataset_name == "localdata":
-    datasets = data_helpers.get_datasets_localdata(container_path=cfg["datasets"][dataset_name]["container_path"],
+    datasets = textcnn_datahelpers.get_datasets_localdata(container_path=cfg["datasets"][dataset_name]["container_path"],
                                                      categories=cfg["datasets"][dataset_name]["categories"],
                                                      shuffle=cfg["datasets"][dataset_name]["shuffle"],
                                                      random_state=cfg["datasets"][dataset_name]["random_state"])
-x_text, y = data_helpers.load_data_labels(datasets)
+x_text, y = textcnn_datahelpers.load_data_labels(datasets)
 
 # Build vocabulary
 max_document_length = max([len(x.split(" ")) for x in x_text])
@@ -163,14 +163,14 @@ with tf.Graph().as_default():
             if embedding_name == 'word2vec':
                 # load embedding vectors from the word2vec
                 print("Load word2vec file {}".format(cfg['word_embeddings']['word2vec']['path']))
-                initW = data_helpers.load_embedding_vectors_word2vec(vocabulary,
+                initW = textcnn_datahelpers.load_embedding_vectors_word2vec(vocabulary,
                                                                      cfg['word_embeddings']['word2vec']['path'],
                                                                      cfg['word_embeddings']['word2vec']['binary'])
                 print("word2vec file has been loaded")
             elif embedding_name == 'glove':
                 # load embedding vectors from the glove
                 print("Load glove file {}".format(cfg['word_embeddings']['glove']['path']))
-                initW = data_helpers.load_embedding_vectors_glove(vocabulary,
+                initW = textcnn_datahelpers.load_embedding_vectors_glove(vocabulary,
                                                                   cfg['word_embeddings']['glove']['path'],
                                                                   embedding_dimension)
                 print("glove file has been loaded\n")
@@ -210,7 +210,7 @@ with tf.Graph().as_default():
                 writer.add_summary(summaries, step)
 
         # Generate batches
-        batches = data_helpers.batch_iter(
+        batches = textcnn_datahelpers.batch_iter(
             list(zip(x_train, y_train)), FLAGS.batch_size, FLAGS.num_epochs)
         # Training loop. For each batch...
         for batch in batches:

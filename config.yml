@@ -1,3 +1,8 @@
+textcnn:
+  batch_size: 64
+  checkpoint_dir:
+  allow_soft_placement: True
+  log_device_placement: False
 word_embeddings:
   # Two types of word embedding algorithm (word2vec and glove) are supported.
   # Just set the default to empty string to disable the word embeddings

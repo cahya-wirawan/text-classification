@@ -5,8 +5,8 @@ import numpy as np
 import os
 import time
 import datetime
-import data_helpers
-from text_cnn import TextCNN
+import textcnn_datahelpers
+from textcnn import TextCNN
 from tensorflow.contrib import learn
 import csv
 from sklearn import metrics
@@ -43,14 +43,14 @@ datasets = None
 dataset_name = cfg["datasets"]["default"]
 if FLAGS.eval_train:
     if dataset_name == "mrpolarity":
-        datasets = data_helpers.get_datasets_mrpolarity(cfg["datasets"][dataset_name]["positive_data_file"]["path"],
+        datasets = textcnn_datahelpers.get_datasets_mrpolarity(cfg["datasets"][dataset_name]["positive_data_file"]["path"],
                                              cfg["datasets"][dataset_name]["negative_data_file"]["path"])
     elif dataset_name == "20newsgroup":
-        datasets = data_helpers.get_datasets_20newsgroup(subset="test",
+        datasets = textcnn_datahelpers.get_datasets_20newsgroup(subset="test",
                                               categories=cfg["datasets"][dataset_name]["categories"],
                                               shuffle=cfg["datasets"][dataset_name]["shuffle"],
                                               random_state=cfg["datasets"][dataset_name]["random_state"])
-    x_raw, y_test = data_helpers.load_data_labels(datasets)
+    x_raw, y_test = textcnn_datahelpers.load_data_labels(datasets)
     y_test = np.argmax(y_test, axis=1)
     print("Total number of test examples: {}".format(len(y_test)))
 else:
@@ -92,7 +92,7 @@ with graph.as_default():
         predictions = graph.get_operation_by_name("output/predictions").outputs[0]
 
         # Generate batches for one epoch
-        batches = data_helpers.batch_iter(list(x_test), FLAGS.batch_size, 1, shuffle=False)
+        batches = textcnn_datahelpers.batch_iter(list(x_test), FLAGS.batch_size, 1, shuffle=False)
 
         # Collect the predictions here
         all_predictions = []

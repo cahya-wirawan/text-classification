@@ -7,7 +7,7 @@ import sys
 import socket
 import hashlib
 import struct
-
+import json
 
 class TextClassificationServer(object):
     """
@@ -36,9 +36,10 @@ class TextClassificationServer(object):
 
     def start(self):
         try:
-            self.server = self.ThreadedTCPServer((self.host, self.port),
+            self.server = self.ThreadedTCPServer((self.__host, self.__port),
                                                  self.ThreadedTCPRequestHandler)
             self.server.socket.settimeout(self.__timeout)
+            self.server.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
             # Start a thread with the server -- that thread will then start one
             # more thread for each request
@@ -52,6 +53,9 @@ class TextClassificationServer(object):
         except socket.error:
             e = sys.exc_info()[1]
             raise ConnectionError(e)
+
+    def shutdown(self):
+        self.server.shutdown()
 
     class ThreadedTCPRequestHandler(socketserver.StreamRequestHandler):
         max_buffer_size = 4096
@@ -91,11 +95,17 @@ class TextClassificationServer(object):
             return data
 
         def ping(self):
-            response = b'PONG'
+            response = dict()
+            response["status"] = "OK"
+            response["result"] = "PONG"
+            response = json.dumps(response).encode('utf-8')
             self.send(response)
 
         def version(self):
-            response = b'version'
+            response = dict()
+            response["status"] = "OK"
+            response["result"] = "version"
+            response = json.dumps(response).encode('utf-8')
             self.send(response)
 
         def reload(self):
@@ -103,19 +113,30 @@ class TextClassificationServer(object):
             self.send(response)
 
         def list_algoritm(self):
-            response = b'list_algoritm'
+            response = dict()
+            response["status"] = "OK"
+            response["result"] = "list_algoritm"
+            response = json.dumps(response).encode('utf-8')
             self.send(response)
 
         def set_algoritm(self):
-            response = b'set_algoritm'
+            response = dict()
+            response["status"] = "OK"
+            response["result"] = "set_algoritm"
+            response = json.dumps(response).encode('utf-8')
             self.send(response)
 
         def scan(self, file_name=None):
             hash_md5 = hashlib.md5(open(file_name, 'rb').read())
+            response = dict()
             if hash_md5:
-                response = bytes("OK: {}: {}".format(file_name, hash_md5.hexdigest()), 'utf-8')
+                response["status"] = "OK"
+                response["result"] = hash_md5.hexdigest()
+                response = json.dumps(response).encode('utf-8')
             else:
-                response = bytes("Not OK: {}: {}".format(file_name, ""), 'utf-8')
+                response["status"] = "Error"
+                response["result"] = ""
+                response = json.dumps(response).encode('utf-8')
             self.send(response)
 
         def instream(self, file_name=None):
@@ -125,10 +146,15 @@ class TextClassificationServer(object):
                 if data is None:
                     break
                 hash_md5.update(data)
+            response = dict()
             if hash_md5:
-                response = bytes("OK: {}: {}".format(file_name, hash_md5.hexdigest()), 'utf-8')
+                response["status"] = "OK"
+                response["result"] = hash_md5.hexdigest()
+                response = json.dumps(response).encode('utf-8')
             else:
-                response = bytes("Not OK: {}: {}".format(file_name, ""), 'utf-8')
+                response["status"] = "Error"
+                response["result"] = ""
+                response = json.dumps(response).encode('utf-8')
             self.send(response)
 
     class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
