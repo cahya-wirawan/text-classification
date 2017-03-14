@@ -1,5 +1,4 @@
 import socket
-import sys
 import os
 import struct
 import logging
@@ -10,7 +9,6 @@ FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
 logging.basicConfig(format=FORMAT)
 
 MAX_BUFFER_SIZE = 1024
-data = " ".join(sys.argv[1:])
 
 class simple_socket(object):
     max_data_size = 4096
@@ -74,32 +72,30 @@ def scan(address='localhost', port=3333, file_name=None):
     except OSError as err:
         print("OS error: {0}".format(err))
 
-def instream(address='localhost', port=3333, file_name=None):
-    statinfo = os.stat(file_name)
-    if statinfo is not None:
-        ss = simple_socket(address=address, port=port)
-        command = "INSTREAM:{}\n".format(file_name)
-        ss.send(command.encode('utf-8'))
-        try:
-            with open(file_name, 'rb') as f:
-                while True:
-                    data = f.read(MAX_BUFFER_SIZE)
-                    if not data:
-                        break
-                    ss.send(data)
-            ss.send(b'')
-            response = ss.receive()
-            print("Client Received: {}".format(response))
-            return response
-        finally:
-            ss.close()
 
-# client(ip, port, "Hello World 1:ABC:12\n")
-# client(ip, port, "Hello World 2:DEF:11\n")
+def instream(address='localhost', port=3333, data=None):
+    ss = simple_socket(address=address, port=port)
+    command = "INSTREAM\n"
+    ss.send(command.encode('utf-8'))
+    try:
+        data_len = len(data)
+        start_pos = 0
+        end_pos = MAX_BUFFER_SIZE
+        while start_pos < data_len:
+            end_pos = min(end_pos, data_len)
+            ss.send(data[start_pos:end_pos])
+            start_pos += MAX_BUFFER_SIZE
+            end_pos += MAX_BUFFER_SIZE
+        ss.send(b'')
+        response = ss.receive()
+        print("Client Received: {}".format(response))
+        return response
+    finally:
+        ss.close()
 
 # address, port = "localhost", 3333
 # client(address, port, "PING\n")
 # client(address, port, "VERSION\n")
 # client(address, port, "RELOAD\n")
 # scan(address, port, "/bin/sh")
-# instream(address, port, "/bin/sh")
+# instream(address, port, b"Text Classification")
