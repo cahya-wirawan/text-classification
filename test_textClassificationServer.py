@@ -9,7 +9,9 @@ import os
 class TestTextClassificationServer(unittest.TestCase):
     host, port = "localhost", 3333
     server = None
-    data = b"Text Classification"
+    data = b"Text Classification"*1000
+    # md5sum = md5(data).hexdigest()
+    md5sum = "4b1c78bb298ef3d3d3ee9a244cb5e0c6"
 
     @classmethod
     def setUpClass(self):
@@ -46,12 +48,12 @@ class TestTextClassificationServer(unittest.TestCase):
         response = scan(self.host, self.port, temp_path)
         response = json.loads(response.decode('utf-8'))
         os.remove(temp_path)
-        self.assertEqual('87d9718b72893660ff7556dc83cb9bb6', response['result'])
+        self.assertEqual(self.md5sum, response['result'])
 
     def test_instream(self):
         response = instream(self.host, self.port, self.data)
         response = json.loads(response.decode('utf-8'))
-        self.assertEqual('87d9718b72893660ff7556dc83cb9bb6', response['result'])
+        self.assertEqual(self.md5sum, response['result'])
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
