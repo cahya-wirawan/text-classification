@@ -34,7 +34,7 @@ class TextClassificationServer(object):
     def port(self):
         return self.__port
 
-    def start(self):
+    def start(self, run_forever=True):
         try:
             self.server = self.ThreadedTCPServer((self.__host, self.__port),
                                                  self.ThreadedTCPRequestHandler)
@@ -48,8 +48,8 @@ class TextClassificationServer(object):
             server_thread.daemon = True
             server_thread.start()
             print("Server loop running in thread:", server_thread.name)
-            self.server.serve_forever()
-            print("Will never go here")
+            if run_forever:
+                self.server.serve_forever()
         except socket.error:
             e = sys.exc_info()[1]
             raise ConnectionError(e)
@@ -158,4 +158,5 @@ class TextClassificationServer(object):
             self.send(response)
 
     class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+        allow_reuse_address = True
         pass

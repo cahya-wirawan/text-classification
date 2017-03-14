@@ -3,14 +3,27 @@ from textclassification import TextClassificationServer
 from textclassification_client import client, scan, instream
 import json
 
+
 class TestTextClassificationServer(unittest.TestCase):
     host, port = "localhost", 3333
+    server = None
+
+    @classmethod
+    def setUpClass(self):
+        print("setUpClass")
+        self.server = TextClassificationServer(host=self.host, port=self.port)
+        self.server.start(run_forever=False)
+
+    @classmethod
+    def tearDownClass(self):
+        print("tearDownClass")
+        self.server.shutdown()
 
     def setUp(self):
         print("setUp")
 
     def tearDown(self):
-        print("shutDown")
+        print("tearDown")
 
     def test_ping(self):
         response = client(self.host, self.port, "PING\n")
