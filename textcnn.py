@@ -105,39 +105,39 @@ class TextCNNEvaluator(object):
         self.vocab_processor = learn.preprocessing.VocabularyProcessor.restore(self.vocab_path)
         print("vocab_processor: {}".format(self.vocab_processor))
 
-    def predict(self, x_raw=None):
-        self.x_raw = x_raw
-        self.x_test = np.array(list(self.vocab_processor.transform(self.x_raw)))
-
         checkpoint_file = tf.train.latest_checkpoint(self.cfg['textcnn']['training_dir'] + "/checkpoints")
         graph = tf.Graph()
         with graph.as_default():
             session_conf = tf.ConfigProto(
                 allow_soft_placement=self.cfg['textcnn']['allow_soft_placement'],
                 log_device_placement=self.cfg['textcnn']['log_device_placement'])
-            sess = tf.Session(config=session_conf)
-            with sess.as_default():
+            self.sess = tf.Session(config=session_conf)
+            with self.sess.as_default():
                 # Load the saved meta graph and restore variables
                 saver = tf.train.import_meta_graph("{}.meta".format(checkpoint_file))
-                saver.restore(sess, checkpoint_file)
+                saver.restore(self.sess, checkpoint_file)
 
                 # Get the placeholders from the graph by name
-                input_x = graph.get_operation_by_name("input_x").outputs[0]
+                self.input_x = graph.get_operation_by_name("input_x").outputs[0]
                 # input_y = graph.get_operation_by_name("input_y").outputs[0]
-                dropout_keep_prob = graph.get_operation_by_name("dropout_keep_prob").outputs[0]
+                self.dropout_keep_prob = graph.get_operation_by_name("dropout_keep_prob").outputs[0]
 
                 # Tensors we want to evaluate
-                predictions = graph.get_operation_by_name("output/predictions").outputs[0]
+                self.predictions = graph.get_operation_by_name("output/predictions").outputs[0]
 
-                # Generate batches for one epoch
-                batches = textcnn_datahelpers.batch_iter(list(self.x_test), self.cfg['textcnn']['batch_size'], 1, shuffle=False)
+    def predict(self, x_raw=None):
+        self.x_raw = x_raw
+        self.x_test = np.array(list(self.vocab_processor.transform(self.x_raw)))
 
-                # Collect the predictions here
-                all_predictions = []
+        # Generate batches for one epoch
+        batches = textcnn_datahelpers.batch_iter(list(self.x_test), self.cfg['textcnn']['batch_size'], 1, shuffle=False)
 
-                for x_test_batch in batches:
-                    batch_predictions = sess.run(predictions, {input_x: x_test_batch, dropout_keep_prob: 1.0})
-                    all_predictions = np.concatenate([all_predictions, batch_predictions])
+        # Collect the predictions here
+        all_predictions = []
+
+        for x_test_batch in batches:
+            batch_predictions = self.sess.run(self.predictions, {self.input_x: x_test_batch, self.dropout_keep_prob: 1.0})
+            all_predictions = np.concatenate([all_predictions, batch_predictions])
 
         response = [int(i) for i in all_predictions]
         dataset_name = self.cfg["datasets"]["default"]
