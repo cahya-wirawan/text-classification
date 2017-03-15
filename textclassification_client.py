@@ -93,6 +93,27 @@ def instream(address='localhost', port=3333, data=None):
     finally:
         ss.close()
 
+
+def predict_stream(address='localhost', port=3333, data=None):
+    ss = simple_socket(address=address, port=port)
+    command = "PREDICT_STREAM\n"
+    ss.send(command.encode('utf-8'))
+    try:
+        data_len = len(data)
+        start_pos = 0
+        end_pos = MAX_BUFFER_SIZE
+        while start_pos < data_len:
+            end_pos = min(end_pos, data_len)
+            ss.send(data[start_pos:end_pos])
+            start_pos += MAX_BUFFER_SIZE
+            end_pos += MAX_BUFFER_SIZE
+        ss.send(b'')
+        response = ss.receive()
+        print("Client Received: {}".format(response))
+        return response
+    finally:
+        ss.close()
+
 # address, port = "localhost", 3333
 # client(address, port, "PING\n")
 # client(address, port, "VERSION\n")

@@ -8,11 +8,15 @@ import socket
 import hashlib
 import struct
 import json
+from textcnn import TextCNNEvaluator, TextCNN
+
+_eval = None
 
 class TextClassificationServer(object):
     """
     Class for using TextClassificationServer with a network socket
     """
+    evaluator = None
 
     def __init__(self, host='127.0.0.1', port=3333, timeout=None):
         """
@@ -21,10 +25,14 @@ class TextClassificationServer(object):
         port (int) : TCP port
         timeout (float or None) : socket timeout
         """
+        global _eval
         self.__host = host
         self.__port = port
         self.__timeout = timeout
         self.server = None
+        self.evaluator = TextCNNEvaluator()
+        _eval = self.evaluator
+        print("evaluator: {}".format(self.evaluator))
 
     @property
     def host(self):
@@ -79,7 +87,9 @@ class TextClassificationServer(object):
                 file_name = header[1]
                 self.scan(file_name=file_name)
             elif header[0] == b'INSTREAM':
-                self.instream(file_name=cur_thread.name)
+                self.instream()
+            elif header[0] == b'PREDICT_STREAM':
+                self.predict_stream()
 
         def send(self, data):
             size = len(data)
@@ -139,7 +149,7 @@ class TextClassificationServer(object):
                 response = json.dumps(response).encode('utf-8')
             self.send(response)
 
-        def instream(self, file_name=None):
+        def instream(self):
             hash_md5 = hashlib.md5()
             while True:
                 data = self.receive()
@@ -155,6 +165,25 @@ class TextClassificationServer(object):
                 response["status"] = "Error"
                 response["result"] = ""
                 response = json.dumps(response).encode('utf-8')
+            self.send(response)
+
+        def predict_stream(self):
+            server = TextClassificationServer
+            print("server: {}".format(server))
+            evaluator = TextClassificationServer.evaluator
+            evaluator = _eval
+            stream = b''
+            while True:
+                data = self.receive()
+                print("data:{}".format(data))
+                if data is None:
+                    break
+                stream += data
+            stream = stream.decode('utf-8')
+            response = dict()
+            response["status"] = "OK"
+            response["result"] = evaluator.predict([stream])
+            response = json.dumps(response).encode('utf-8')
             self.send(response)
 
     class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
