@@ -10,6 +10,7 @@ import struct
 import json
 from textcnn import TextCNNEvaluator, TextCNN
 
+
 class TextClassificationServer(object):
     """
     Class for using TextClassificationServer with a network socket
@@ -172,9 +173,10 @@ class TextClassificationServer(object):
                     break
                 stream += data
             stream = stream.decode('utf-8')
+            multi_line = stream.split('\n')
             response = dict()
             response["status"] = "OK"
-            response["result"] = evaluator.predict([stream])
+            response["result"] = evaluator.predict(multi_line)
             response = json.dumps(response).encode('utf-8')
             self.send(response)
 

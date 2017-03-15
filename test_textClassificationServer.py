@@ -12,7 +12,7 @@ class TestTextClassificationServer(unittest.TestCase):
     data = b"Text Classification"*1000
     # md5sum = md5(data).hexdigest()
     md5sum = "4b1c78bb298ef3d3d3ee9a244cb5e0c6"
-    x_raw = [b"a masterpiece four years in the making", b"too slow for a younger crowd, too shallow for an older one"]
+    x_raw = ["a masterpiece four years in the making", "too slow for a younger crowd, too shallow for an older one"]
 
     @classmethod
     def setUpClass(cls):
@@ -56,14 +56,19 @@ class TestTextClassificationServer(unittest.TestCase):
         self.assertEqual(self.md5sum, response['result'])
 
     def test_predict_stream_0(self):
-        response = predict_stream(self.host, self.port, self.x_raw[0])
+        response = predict_stream(self.host, self.port, self.x_raw[0].encode('utf-8'))
         response = json.loads(response.decode('utf-8'))
         self.assertEqual("positive_data", response['result'][0])
 
     def test_predict_stream_1(self):
-        response = predict_stream(self.host, self.port, self.x_raw[1])
+        response = predict_stream(self.host, self.port, self.x_raw[1].encode('utf-8'))
         response = json.loads(response.decode('utf-8'))
         self.assertEqual("negative_data", response['result'][0])
+
+    def test_predict_stream_2(self):
+        response = predict_stream(self.host, self.port, '\n'.join(self.x_raw).encode('utf-8'))
+        response = json.loads(response.decode('utf-8'))
+        self.assertEqual(["positive_data", "negative_data"], response['result'])
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
