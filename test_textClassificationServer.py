@@ -15,15 +15,14 @@ class TestTextClassificationServer(unittest.TestCase):
     x_raw = [b"a masterpiece four years in the making", b"too slow for a younger crowd, too shallow for an older one"]
 
     @classmethod
-    def setUpClass(self):
-        print("setUpClass")
-        self.server = TextClassificationServer(host=self.host, port=self.port)
-        self.server.start(run_forever=False)
+    def setUpClass(cls):
+        cls.server = TextClassificationServer(host=cls.host, port=cls.port)
+        print("TextClassificationServer eval: {} ".format(TextClassificationServer.evaluator))
+        cls.server.start(run_forever=False)
 
     @classmethod
-    def tearDownClass(self):
-        print("tearDownClass")
-        self.server.shutdown()
+    def tearDownClass(cls):
+        cls.server.shutdown()
 
     def setUp(self):
         print("setUp")

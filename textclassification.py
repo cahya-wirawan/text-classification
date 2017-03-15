@@ -10,8 +10,6 @@ import struct
 import json
 from textcnn import TextCNNEvaluator, TextCNN
 
-_eval = None
-
 class TextClassificationServer(object):
     """
     Class for using TextClassificationServer with a network socket
@@ -25,14 +23,11 @@ class TextClassificationServer(object):
         port (int) : TCP port
         timeout (float or None) : socket timeout
         """
-        global _eval
         self.__host = host
         self.__port = port
         self.__timeout = timeout
         self.server = None
-        self.evaluator = TextCNNEvaluator()
-        _eval = self.evaluator
-        print("evaluator: {}".format(self.evaluator))
+        TextClassificationServer.evaluator = TextCNNEvaluator()
 
     @property
     def host(self):
@@ -168,10 +163,7 @@ class TextClassificationServer(object):
             self.send(response)
 
         def predict_stream(self):
-            server = TextClassificationServer
-            print("server: {}".format(server))
             evaluator = TextClassificationServer.evaluator
-            evaluator = _eval
             stream = b''
             while True:
                 data = self.receive()
