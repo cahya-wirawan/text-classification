@@ -21,8 +21,8 @@ datasets:
   default: mrpolarity
   mrpolarity:
     categories:
-      - negative_data
       - positive_data
+      - negative_data
     positive_data_file:
       path: "data/rt-polaritydata/rt-polarity.pos"
       info: "Data source for the positive data"

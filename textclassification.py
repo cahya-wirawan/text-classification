@@ -8,6 +8,7 @@ import socket
 import hashlib
 import struct
 import json
+import logging
 from textcnn import TextCNNEvaluator, TextCNN
 
 
@@ -24,6 +25,7 @@ class TextClassificationServer(object):
         port (int) : TCP port
         timeout (float or None) : socket timeout
         """
+        self.logger = logging.getLogger(__name__)
         self.__host = host
         self.__port = port
         self.__timeout = timeout
@@ -51,7 +53,7 @@ class TextClassificationServer(object):
             # Exit the server thread when the main thread terminates
             server_thread.daemon = True
             server_thread.start()
-            print("Server loop running in thread:", server_thread.name)
+            self.logger.info("Server loop running in thread: {}".format(server_thread.name))
             if run_forever:
                 self.server.serve_forever()
         except socket.error:
@@ -64,10 +66,14 @@ class TextClassificationServer(object):
     class ThreadedTCPRequestHandler(socketserver.StreamRequestHandler):
         max_buffer_size = 4096
 
+        def __init__(self, request, client_address, server):
+            self.logger = logging.getLogger(__name__)
+            super().__init__(request, client_address, server)
+
         def handle(self):
             data = self.receive().rstrip()
             cur_thread = threading.current_thread()
-            print("Server {} received: {}".format(cur_thread.name, data))
+            self.logger.info("Thread {} received: {}".format(cur_thread.name, data))
             header = data.split(b':')
             if header[0] == b'PING':
                 self.ping()
@@ -168,7 +174,7 @@ class TextClassificationServer(object):
             stream = b''
             while True:
                 data = self.receive()
-                print("data:{}".format(data))
+                self.logger.debug("Data: {}".format(data))
                 if data is None:
                     break
                 stream += data

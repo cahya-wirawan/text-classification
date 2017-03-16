@@ -4,6 +4,8 @@ import numpy as np
 import yaml
 from tensorflow.contrib import learn
 import textcnn_datahelpers
+import time
+import logging
 
 
 class TextCNN(object):
@@ -14,6 +16,8 @@ class TextCNN(object):
     def __init__(
       self, sequence_length, num_classes, vocab_size,
       embedding_size, filter_sizes, num_filters, l2_reg_lambda=0.0):
+
+        self.logger = logging.getLogger(__name__)
 
         # Placeholders for input, output and dropout
         self.input_x = tf.placeholder(tf.int32, [None, sequence_length], name="input_x")
@@ -95,6 +99,7 @@ class TextCNNEvaluator(object):
     cfg = None
 
     def __init__(self):
+        self.logger = logging.getLogger(__name__)
         with open("config.yml", 'r') as ymlfile:
             self.cfg = yaml.load(ymlfile)
 
@@ -125,6 +130,7 @@ class TextCNNEvaluator(object):
                 self.predictions = graph.get_operation_by_name("output/predictions").outputs[0]
 
     def predict(self, x_raw=None):
+        start = time.time()
         self.x_raw = x_raw
         self.x_test = np.array(list(self.vocab_processor.transform(self.x_raw)))
 
@@ -141,5 +147,7 @@ class TextCNNEvaluator(object):
         response = [int(i) for i in all_predictions]
         dataset_name = self.cfg["datasets"]["default"]
         response = [self.cfg['datasets'][dataset_name]['categories'][i] for i in response]
-        print("response: {}".format(response))
+        end = time.time()
+        self.logger.debug("Predict time: {} seconds".format(end - start))
+        self.logger.debug("Response: {}".format(response))
         return response

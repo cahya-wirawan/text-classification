@@ -1,42 +1,55 @@
 import unittest
 from textclassification import TextClassificationServer
-from textclassification_client import client, scan, instream, predict_stream
+from textclassification_client import TextClassificationClient
 import json
 import tempfile
 import os
+import time
+import logging
+from setup_logging import setup_logging
 
 
 class TestTextClassificationServer(unittest.TestCase):
+    setup_logging()
+    logger = logging.getLogger(__name__)
+    run_server = False
     host, port = "localhost", 3333
     server = None
+    tcc = TextClassificationClient()
     data = b"Text Classification"*1000
     # md5sum = md5(data).hexdigest()
     md5sum = "4b1c78bb298ef3d3d3ee9a244cb5e0c6"
-    x_raw = ["a masterpiece four years in the making", "too slow for a younger crowd, too shallow for an older one"]
+    x_raw = ["an idealistic love story that brings out the latent 15 year old romantic in everyone",
+             "there are enough moments of heartbreaking honesty to keep one glued to the screen",
+             "the kind of nervous film that will either give you a mild headache or exhilarate you"]
+
 
     @classmethod
     def setUpClass(cls):
-        cls.server = TextClassificationServer(host=cls.host, port=cls.port)
-        print("TextClassificationServer eval: {} ".format(TextClassificationServer.evaluator))
-        cls.server.start(run_forever=False)
+        TestTextClassificationServer.logger.debug("setUpClass")
+        if cls.run_server:
+            cls.server = TextClassificationServer(host=cls.host, port=cls.port)
+            cls.server.start(run_forever=False)
 
     @classmethod
     def tearDownClass(cls):
-        cls.server.shutdown()
+        TestTextClassificationServer.logger.debug("tearDownClass")
+        if cls.run_server:
+            cls.server.shutdown()
 
     def setUp(self):
-        print("setUp")
+        self.logger.debug("setUp")
 
     def tearDown(self):
-        print("tearDown")
+        self.logger.debug("tearDown")
 
     def test_ping(self):
-        response = client(self.host, self.port, "PING\n")
+        response = self.tcc.client(self.host, self.port, "PING\n")
         response = json.loads(response.decode('utf-8'))
         self.assertEqual('PONG', response['result'])
 
     def test_version(self):
-        response = client(self.host, self.port, "VERSION\n")
+        response = self.tcc.client(self.host, self.port, "VERSION\n")
         response = json.loads(response.decode('utf-8'))
         self.assertEqual('version', response['result'])
 
@@ -45,30 +58,39 @@ class TestTextClassificationServer(unittest.TestCase):
         file = os.fdopen(fd, "wb")
         file.write(self.data)
         file.close()
-        response = scan(self.host, self.port, temp_path)
+        response = self.tcc.scan(self.host, self.port, temp_path)
         response = json.loads(response.decode('utf-8'))
         os.remove(temp_path)
         self.assertEqual(self.md5sum, response['result'])
 
     def test_instream(self):
-        response = instream(self.host, self.port, self.data)
+        response = self.tcc.instream(self.host, self.port, self.data)
         response = json.loads(response.decode('utf-8'))
         self.assertEqual(self.md5sum, response['result'])
 
     def test_predict_stream_0(self):
-        response = predict_stream(self.host, self.port, self.x_raw[0].encode('utf-8'))
+        start = time.time()
+        response = self.tcc.predict_stream(self.host, self.port, self.x_raw[0].encode('utf-8'))
         response = json.loads(response.decode('utf-8'))
-        self.assertEqual("positive_data", response['result'][0])
+        end = time.time()
+        self.logger.debug("Time elapsed: {}".format(end - start))
+        self.assertEqual(["positive_data"], response['result'])
 
     def test_predict_stream_1(self):
-        response = predict_stream(self.host, self.port, self.x_raw[1].encode('utf-8'))
+        start = time.time()
+        response = self.tcc.predict_stream(self.host, self.port, self.x_raw[1].encode('utf-8'))
         response = json.loads(response.decode('utf-8'))
-        self.assertEqual("negative_data", response['result'][0])
+        end = time.time()
+        self.logger.debug("Time elapsed: {}".format(end - start))
+        self.assertEqual(["positive_data"], response['result'])
 
     def test_predict_stream_2(self):
-        response = predict_stream(self.host, self.port, '\n'.join(self.x_raw).encode('utf-8'))
+        start = time.time()
+        response = self.tcc.predict_stream(self.host, self.port, '\n'.join(self.x_raw).encode('utf-8'))
         response = json.loads(response.decode('utf-8'))
-        self.assertEqual(["positive_data", "negative_data"], response['result'])
+        end = time.time()
+        self.logger.debug("Time elapsed: {}".format(end - start))
+        self.assertEqual(["positive_data", "positive_data", "negative_data"], response['result'])
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
