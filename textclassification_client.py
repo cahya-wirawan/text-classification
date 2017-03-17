@@ -5,8 +5,6 @@ import struct
 import logging
 from setup_logging import setup_logging
 
-MAX_BUFFER_SIZE = 1024
-
 
 class SimpleSocket(object):
     max_data_size = 4096
@@ -45,6 +43,7 @@ class SimpleSocket(object):
 
 
 class TextClassificationClient(object):
+    max_chunk_size = 1024
 
     def __init__(self, address='localhost', port=3333):
         setup_logging()
@@ -86,12 +85,12 @@ class TextClassificationClient(object):
         try:
             data_len = len(data)
             start_pos = 0
-            end_pos = MAX_BUFFER_SIZE
+            end_pos = self.max_chunk_size
             while start_pos < data_len:
                 end_pos = min(end_pos, data_len)
                 self.simple_socket.send(data[start_pos:end_pos])
-                start_pos += MAX_BUFFER_SIZE
-                end_pos += MAX_BUFFER_SIZE
+                start_pos += self.max_chunk_size
+                end_pos += self.max_chunk_size
             self.simple_socket.send(b'')
             response = self.simple_socket.receive()
             logger.debug("Client Received: {}".format(response))
@@ -106,12 +105,12 @@ class TextClassificationClient(object):
         try:
             data_len = len(data)
             start_pos = 0
-            end_pos = MAX_BUFFER_SIZE
+            end_pos = self.max_chunk_size
             while start_pos < data_len:
                 end_pos = min(end_pos, data_len)
                 self.simple_socket.send(data[start_pos:end_pos])
-                start_pos += MAX_BUFFER_SIZE
-                end_pos += MAX_BUFFER_SIZE
+                start_pos += self.max_chunk_size
+                end_pos += self.max_chunk_size
             self.simple_socket.send(b'')
             response = self.simple_socket.receive()
             logger.debug("Client Received: {}".format(response))
