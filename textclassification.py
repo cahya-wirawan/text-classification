@@ -61,6 +61,7 @@ class TextClassificationServer(object):
             raise ConnectionError(e)
 
     def shutdown(self):
+        self.logger.info("Server shutdown")
         self.server.shutdown()
 
     class ThreadedTCPRequestHandler(socketserver.StreamRequestHandler):
@@ -71,32 +72,45 @@ class TextClassificationServer(object):
             super().__init__(request, client_address, server)
 
         def handle(self):
-            data = self.receive().rstrip()
-            cur_thread = threading.current_thread()
-            self.logger.info("Thread {} received: {}".format(cur_thread.name, data))
-            header = data.split(b':')
-            if header[0] == b'PING':
-                self.ping()
-            elif header[0] == b'VERSION':
-                self.version()
-            elif header[0] == b'RELOAD':
-                self.reload()
-            elif header[0] == b'LIST_ALGORITHM':
-                self.list_algoritm()
-            elif header[0] == b'SET_ALGORITHM':
-                self.set_algoritm()
-            elif header[0] == b'SCAN':
-                file_name = header[1]
-                self.scan(file_name=file_name)
-            elif header[0] == b'INSTREAM':
-                self.instream()
-            elif header[0] == b'PREDICT_STREAM':
-                self.predict_stream()
-            elif header[0] == b'PREDICT_FILE':
-                file_name = header[1]
-                self.predict_file(file_name=file_name)
-            else:
-                self.unknown_command()
+
+            try:
+                cur_thread = threading.current_thread()
+                while True:
+                    data = self.receive()
+                    if data == None:
+                        break
+                    data = data.rstrip()
+                    self.logger.info("Thread {} received: {}".format(cur_thread.name, data))
+                    header = data.split(b':')
+                    if header[0] == b'PING':
+                        self.ping()
+                    elif header[0] == b'VERSION':
+                        self.version()
+                    elif header[0] == b'RELOAD':
+                        self.reload()
+                    elif header[0] == b'LIST_ALGORITHM':
+                        self.list_algoritm()
+                    elif header[0] == b'SET_ALGORITHM':
+                        self.set_algoritm()
+                    elif header[0] == b'SCAN':
+                        file_name = header[1]
+                        self.scan(file_name=file_name)
+                    elif header[0] == b'INSTREAM':
+                        self.instream()
+                    elif header[0] == b'PREDICT_STREAM':
+                        self.predict_stream()
+                    elif header[0] == b'PREDICT_FILE':
+                        file_name = header[1]
+                        self.predict_file(file_name=file_name)
+                    elif header[0] == b'CLOSE':
+                        self.close()
+                        break
+                    else:
+                        self.unknown_command()
+            except socket.error:
+                e = sys.exc_info()[1]
+                raise ConnectionError(e)
+            self.logger.info("Thread {} exit".format(cur_thread.name))
 
         def send(self, data):
             size = len(data)
@@ -105,6 +119,8 @@ class TextClassificationServer(object):
 
         def receive(self):
             packed_header = self.rfile.read(4)
+            if packed_header == b'':
+                return None
             (size, ) = struct.unpack('=I', packed_header)
             if size == 0 or size > self.max_buffer_size:
                 return None
@@ -115,6 +131,13 @@ class TextClassificationServer(object):
             response = dict()
             response["status"] = "OK"
             response["result"] = "PONG"
+            response = json.dumps(response).encode('utf-8')
+            self.send(response)
+
+        def close(self):
+            response = dict()
+            response["status"] = "OK"
+            response["result"] = "Bye"
             response = json.dumps(response).encode('utf-8')
             self.send(response)
 

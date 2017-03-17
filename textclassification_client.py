@@ -10,7 +10,7 @@ MAX_BUFFER_SIZE = 1024
 class SimpleSocket(object):
     max_data_size = 4096
 
-    def __init__(self, address='127.0.0.1', port=3333):
+    def __init__(self, address=None, port=None):
         self.logger = logging.getLogger(__name__)
         self._timeout = None
         self._address = address
@@ -40,36 +40,34 @@ class SimpleSocket(object):
 
 
 class TextClassificationClient(object):
-    address = 'localhost'
-    port = 3333
 
-    def __init__(self):
+    def __init__(self, address='localhost', port=3333):
         setup_logging()
+        self.address = address
+        self.port = port
+        self.simple_socket = SimpleSocket(address=self.address, port=self.port)
 
-    def client(self, address=address, port=port, message=None):
+    def client(self, message=None):
         logger = logging.getLogger(__name__)
-        ss = None
         try:
-            ss = SimpleSocket(address=address, port=port)
-            ss.send(message.encode('utf-8'))
-            response = ss.receive()
+            self.simple_socket.send(message.encode('utf-8'))
+            response = self.simple_socket.receive()
             logger.debug("Client Received: {}".format(response))
             return response
         except ConnectionError as err:
             logger.error("OS error: {0}".format(err))
-        finally:
-            if ss:
-                ss.close()
+        # finally:
+        #     if self.sso:
+        #        self.sso.close()
 
-    def scan(self, address=address, port=port, file_name=None):
+    def scan(self, file_name=None):
         logger = logging.getLogger(__name__)
         try:
             statinfo = os.stat(file_name)
             if statinfo is not None:
-                ss = SimpleSocket(address=address, port=port)
                 command = "SCAN:{}\n".format(file_name)
-                ss.send(command.encode('utf-8'))
-                response = ss.receive()
+                self.simple_socket.send(command.encode('utf-8'))
+                response = self.simple_socket.receive()
                 logger.debug("Client Received: {}".format(response))
                 return response
             else:
@@ -77,57 +75,54 @@ class TextClassificationClient(object):
         except OSError as err:
             logger.error("OS error: {0}".format(err))
 
-    def instream(self, address=address, port=port, data=None):
+    def instream(self, data=None):
         logger = logging.getLogger(__name__)
-        ss = SimpleSocket(address=address, port=port)
         command = "INSTREAM\n"
-        ss.send(command.encode('utf-8'))
+        self.simple_socket.send(command.encode('utf-8'))
         try:
             data_len = len(data)
             start_pos = 0
             end_pos = MAX_BUFFER_SIZE
             while start_pos < data_len:
                 end_pos = min(end_pos, data_len)
-                ss.send(data[start_pos:end_pos])
+                self.simple_socket.send(data[start_pos:end_pos])
                 start_pos += MAX_BUFFER_SIZE
                 end_pos += MAX_BUFFER_SIZE
-            ss.send(b'')
-            response = ss.receive()
+            self.simple_socket.send(b'')
+            response = self.simple_socket.receive()
             logger.debug("Client Received: {}".format(response))
             return response
-        finally:
-            ss.close()
+        except OSError as err:
+            logger.error("OS error: {0}".format(err))
 
-    def predict_stream(self, address=address, port=port, data=None):
+    def predict_stream(self, data=None):
         logger = logging.getLogger(__name__)
-        ss = SimpleSocket(address=address, port=port)
         command = "PREDICT_STREAM\n"
-        ss.send(command.encode('utf-8'))
+        self.simple_socket.send(command.encode('utf-8'))
         try:
             data_len = len(data)
             start_pos = 0
             end_pos = MAX_BUFFER_SIZE
             while start_pos < data_len:
                 end_pos = min(end_pos, data_len)
-                ss.send(data[start_pos:end_pos])
+                self.simple_socket.send(data[start_pos:end_pos])
                 start_pos += MAX_BUFFER_SIZE
                 end_pos += MAX_BUFFER_SIZE
-            ss.send(b'')
-            response = ss.receive()
+            self.simple_socket.send(b'')
+            response = self.simple_socket.receive()
             logger.debug("Client Received: {}".format(response))
             return response
-        finally:
-            ss.close()
+        except OSError as err:
+            logger.error("OS error: {0}".format(err))
 
-    def predict_file(self, address=address, port=port, file_name=None):
+    def predict_file(self, file_name=None):
         logger = logging.getLogger(__name__)
         try:
             statinfo = os.stat(file_name)
             if statinfo is not None:
-                ss = SimpleSocket(address=address, port=port)
                 command = "PREDICT_FILE:{}\n".format(file_name)
-                ss.send(command.encode('utf-8'))
-                response = ss.receive()
+                self.simple_socket.send(command.encode('utf-8'))
+                response = self.simple_socket.receive()
                 logger.debug("Client Received: {}".format(response))
                 return response
             else:
