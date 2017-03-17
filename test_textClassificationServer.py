@@ -44,13 +44,13 @@ class TestTextClassificationServer(unittest.TestCase):
         self.logger.debug("tearDown")
 
     def test_ping(self):
-        response = self.tcc.client("PING\n")
+        response = self.tcc.command("PING\n")
         response = json.loads(response.decode('utf-8'))
         self.logger.debug("{}: {}".format(self._testMethodName, response))
         self.assertEqual('PONG', response['result'])
 
     def test_version(self):
-        response = self.tcc.client("VERSION\n")
+        response = self.tcc.command("VERSION\n")
         response = json.loads(response.decode('utf-8'))
         self.logger.debug("{}: {}".format(self._testMethodName, response))
         self.assertEqual(__version__, response['result'])
@@ -122,13 +122,13 @@ class TestTextClassificationServer(unittest.TestCase):
         self.assertEqual(['positive_data', 'positive_data', 'negative_data'], response['result'])
 
     def test_unknown_command(self):
-        response = self.tcc.client("Unknown command\n")
+        response = self.tcc.command("Unknown command\n")
         response = json.loads(response.decode('utf-8'))
         self.logger.debug("{}: {}".format(self._testMethodName, response))
         self.assertEqual('Unknown Command', response['result'])
 
     def test_close(self):
-        response = self.tcc.client("CLOSE\n")
+        response = self.tcc.command("CLOSE\n")
         response = json.loads(response.decode('utf-8'))
         self.logger.debug("{}: {}".format(self._testMethodName, response))
         self.assertEqual('Bye', response['result'])

@@ -1,5 +1,6 @@
 import socket
 import os
+import sys
 import struct
 import logging
 from setup_logging import setup_logging
@@ -16,7 +17,11 @@ class SimpleSocket(object):
         self._address = address
         self._port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect((self._address, self._port))
+        try:
+            self.socket.connect((self._address, self._port))
+        except ConnectionError as err:
+            self.logger.error("{} to {}:{}".format(err, self._address, self._port, err))
+            sys.exit()
 
     def close(self):
         self.logger.debug("Closing main socket")
@@ -47,18 +52,15 @@ class TextClassificationClient(object):
         self.port = port
         self.simple_socket = SimpleSocket(address=self.address, port=self.port)
 
-    def client(self, message=None):
+    def command(self, message=None):
         logger = logging.getLogger(__name__)
         try:
             self.simple_socket.send(message.encode('utf-8'))
             response = self.simple_socket.receive()
-            logger.debug("Client Received: {}".format(response))
+            logger.debug("command Received: {}".format(response))
             return response
         except ConnectionError as err:
             logger.error("OS error: {0}".format(err))
-        # finally:
-        #     if self.sso:
-        #        self.sso.close()
 
     def md5_file(self, file_name=None):
         # This function is just for testing purpose
