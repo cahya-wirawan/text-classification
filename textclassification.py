@@ -92,11 +92,11 @@ class TextClassificationServer(object):
                         self.list_algoritm()
                     elif header[0] == b'SET_ALGORITHM':
                         self.set_algoritm()
-                    elif header[0] == b'SCAN':
+                    elif header[0] == b'MD5_FILE':
                         file_name = header[1]
-                        self.scan(file_name=file_name)
-                    elif header[0] == b'INSTREAM':
-                        self.instream()
+                        self.md5_file(file_name=file_name)
+                    elif header[0] == b'MD5_STREAM':
+                        self.md5_stream()
                     elif header[0] == b'PREDICT_STREAM':
                         self.predict_stream()
                     elif header[0] == b'PREDICT_FILE':
@@ -166,7 +166,8 @@ class TextClassificationServer(object):
             response = json.dumps(response).encode('utf-8')
             self.send(response)
 
-        def scan(self, file_name=None):
+        def md5_file(self, file_name=None):
+            # This function is just for testing purpose
             hash_md5 = hashlib.md5(open(file_name, 'rb').read())
             response = dict()
             if hash_md5:
@@ -179,7 +180,8 @@ class TextClassificationServer(object):
                 response = json.dumps(response).encode('utf-8')
             self.send(response)
 
-        def instream(self):
+        def md5_stream(self):
+            # This function is just for testing purpose
             hash_md5 = hashlib.md5()
             while True:
                 data = self.receive()

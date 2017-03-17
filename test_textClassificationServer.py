@@ -55,19 +55,19 @@ class TestTextClassificationServer(unittest.TestCase):
         self.logger.debug("{}: {}".format(self._testMethodName, response))
         self.assertEqual('version', response['result'])
 
-    def test_scan(self):
+    def test_md5_file(self):
         fd, temp_path = tempfile.mkstemp()
         file = os.fdopen(fd, "wb")
         file.write(self.data)
         file.close()
-        response = self.tcc.scan(temp_path)
+        response = self.tcc.md5_file(temp_path)
         response = json.loads(response.decode('utf-8'))
         os.remove(temp_path)
         self.logger.debug("{}: {}".format(self._testMethodName, response))
         self.assertEqual(self.md5sum, response['result'])
 
-    def test_instream(self):
-        response = self.tcc.instream(self.data)
+    def test_md5_stream(self):
+        response = self.tcc.md5_stream(self.data)
         response = json.loads(response.decode('utf-8'))
         self.logger.debug("{}: {}".format(self._testMethodName, response))
         self.assertEqual(self.md5sum, response['result'])

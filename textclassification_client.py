@@ -60,12 +60,13 @@ class TextClassificationClient(object):
         #     if self.sso:
         #        self.sso.close()
 
-    def scan(self, file_name=None):
+    def md5_file(self, file_name=None):
+        # This function is just for testing purpose
         logger = logging.getLogger(__name__)
         try:
             statinfo = os.stat(file_name)
             if statinfo is not None:
-                command = "SCAN:{}\n".format(file_name)
+                command = "MD5_FILE:{}\n".format(file_name)
                 self.simple_socket.send(command.encode('utf-8'))
                 response = self.simple_socket.receive()
                 logger.debug("Client Received: {}".format(response))
@@ -75,9 +76,10 @@ class TextClassificationClient(object):
         except OSError as err:
             logger.error("OS error: {0}".format(err))
 
-    def instream(self, data=None):
+    def md5_stream(self, data=None):
+        # This function is just for testing purpose
         logger = logging.getLogger(__name__)
-        command = "INSTREAM\n"
+        command = "MD5_STREAM\n"
         self.simple_socket.send(command.encode('utf-8'))
         try:
             data_len = len(data)
