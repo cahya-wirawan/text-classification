@@ -10,7 +10,7 @@ import struct
 import json
 import logging
 from textcnn import TextCNNEvaluator, TextCNN
-
+from _version import __version__
 
 class TextClassificationServer(object):
     """
@@ -144,7 +144,7 @@ class TextClassificationServer(object):
         def version(self):
             response = dict()
             response["status"] = "OK"
-            response["result"] = "version"
+            response["result"] = __version__
             response = json.dumps(response).encode('utf-8')
             self.send(response)
 

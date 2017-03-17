@@ -7,7 +7,7 @@ import os
 import time
 import logging
 from setup_logging import setup_logging
-
+from _version import __version__
 
 class TestTextClassificationServer(unittest.TestCase):
     setup_logging()
@@ -53,7 +53,7 @@ class TestTextClassificationServer(unittest.TestCase):
         response = self.tcc.client("VERSION\n")
         response = json.loads(response.decode('utf-8'))
         self.logger.debug("{}: {}".format(self._testMethodName, response))
-        self.assertEqual('version', response['result'])
+        self.assertEqual(__version__, response['result'])
 
     def test_md5_file(self):
         fd, temp_path = tempfile.mkstemp()
