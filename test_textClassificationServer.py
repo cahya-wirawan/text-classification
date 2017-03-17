@@ -1,6 +1,5 @@
 import unittest
-from textclassification import TextClassificationServer
-from textclassification_client import TextClassificationClient
+from textclassification import TextClassificationServer, TextClassificationClient
 import json
 import tempfile
 import os
@@ -8,6 +7,7 @@ import time
 import logging
 from setup_logging import setup_logging
 from _version import __version__
+
 
 class TestTextClassificationServer(unittest.TestCase):
     setup_logging()
