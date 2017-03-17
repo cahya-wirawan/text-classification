@@ -92,6 +92,11 @@ class TextClassificationServer(object):
                 self.instream()
             elif header[0] == b'PREDICT_STREAM':
                 self.predict_stream()
+            elif header[0] == b'PREDICT_FILE':
+                file_name = header[1]
+                self.predict_file(file_name=file_name)
+            else:
+                self.unknown_command()
 
         def send(self, data):
             size = len(data)
@@ -183,6 +188,23 @@ class TextClassificationServer(object):
             response = dict()
             response["status"] = "OK"
             response["result"] = evaluator.predict(multi_line)
+            response = json.dumps(response).encode('utf-8')
+            self.send(response)
+
+        def predict_file(self, file_name=None):
+            evaluator = TextClassificationServer.evaluator
+            data = open(file_name, 'rb').read().decode('utf-8')
+            multi_line = data.split('\n')
+            response = dict()
+            response["status"] = "OK"
+            response["result"] = evaluator.predict(multi_line)
+            response = json.dumps(response).encode('utf-8')
+            self.send(response)
+
+        def unknown_command(self):
+            response = dict()
+            response["status"] = "ERROR"
+            response["result"] = "Unknown Command"
             response = json.dumps(response).encode('utf-8')
             self.send(response)
 

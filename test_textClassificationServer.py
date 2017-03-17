@@ -46,11 +46,13 @@ class TestTextClassificationServer(unittest.TestCase):
     def test_ping(self):
         response = self.tcc.client(self.host, self.port, "PING\n")
         response = json.loads(response.decode('utf-8'))
+        self.logger.debug("{}: {}".format(self._testMethodName, response))
         self.assertEqual('PONG', response['result'])
 
     def test_version(self):
         response = self.tcc.client(self.host, self.port, "VERSION\n")
         response = json.loads(response.decode('utf-8'))
+        self.logger.debug("{}: {}".format(self._testMethodName, response))
         self.assertEqual('version', response['result'])
 
     def test_scan(self):
@@ -61,11 +63,13 @@ class TestTextClassificationServer(unittest.TestCase):
         response = self.tcc.scan(self.host, self.port, temp_path)
         response = json.loads(response.decode('utf-8'))
         os.remove(temp_path)
+        self.logger.debug("{}: {}".format(self._testMethodName, response))
         self.assertEqual(self.md5sum, response['result'])
 
     def test_instream(self):
         response = self.tcc.instream(self.host, self.port, self.data)
         response = json.loads(response.decode('utf-8'))
+        self.logger.debug("{}: {}".format(self._testMethodName, response))
         self.assertEqual(self.md5sum, response['result'])
 
     def test_predict_stream_0(self):
@@ -74,6 +78,7 @@ class TestTextClassificationServer(unittest.TestCase):
         response = json.loads(response.decode('utf-8'))
         end = time.time()
         self.logger.debug("Time elapsed: {}".format(end - start))
+        self.logger.debug("{}: {}".format(self._testMethodName, response))
         self.assertEqual(["positive_data"], response['result'])
 
     def test_predict_stream_1(self):
@@ -82,6 +87,7 @@ class TestTextClassificationServer(unittest.TestCase):
         response = json.loads(response.decode('utf-8'))
         end = time.time()
         self.logger.debug("Time elapsed: {}".format(end - start))
+        self.logger.debug("{}: {}".format(self._testMethodName, response))
         self.assertEqual(["positive_data"], response['result'])
 
     def test_predict_stream_2(self):
@@ -90,7 +96,36 @@ class TestTextClassificationServer(unittest.TestCase):
         response = json.loads(response.decode('utf-8'))
         end = time.time()
         self.logger.debug("Time elapsed: {}".format(end - start))
+        self.logger.debug("{}: {}".format(self._testMethodName, response))
         self.assertEqual(["positive_data", "positive_data", "negative_data"], response['result'])
+
+    def test_predict_file(self):
+        fd, temp_path = tempfile.mkstemp()
+        file = os.fdopen(fd, "wb")
+        file.write(self.x_raw[1].encode('utf-8'))
+        file.close()
+        response = self.tcc.predict_file(self.host, self.port, temp_path)
+        response = json.loads(response.decode('utf-8'))
+        os.remove(temp_path)
+        self.logger.debug("{}: {}".format(self._testMethodName, response))
+        self.assertEqual(["positive_data"], response['result'])
+
+    def test_predict_file_multilines(self):
+        fd, temp_path = tempfile.mkstemp()
+        file = os.fdopen(fd, "wb")
+        file.write('\n'.join(self.x_raw).encode('utf-8'))
+        file.close()
+        response = self.tcc.predict_file(self.host, self.port, temp_path)
+        response = json.loads(response.decode('utf-8'))
+        os.remove(temp_path)
+        self.logger.debug("{}: {}".format(self._testMethodName, response))
+        self.assertEqual(['positive_data', 'positive_data', 'negative_data'], response['result'])
+
+    def test_unknown_command(self):
+        response = self.tcc.client(self.host, self.port, "Unknown command\n")
+        response = json.loads(response.decode('utf-8'))
+        self.logger.debug("{}: {}".format(self._testMethodName, response))
+        self.assertEqual('Unknown Command', response['result'])
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

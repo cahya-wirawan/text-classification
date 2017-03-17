@@ -118,3 +118,19 @@ class TextClassificationClient(object):
             return response
         finally:
             ss.close()
+
+    def predict_file(self, address=address, port=port, file_name=None):
+        logger = logging.getLogger(__name__)
+        try:
+            statinfo = os.stat(file_name)
+            if statinfo is not None:
+                ss = SimpleSocket(address=address, port=port)
+                command = "PREDICT_FILE:{}\n".format(file_name)
+                ss.send(command.encode('utf-8'))
+                response = ss.receive()
+                logger.debug("Client Received: {}".format(response))
+                return response
+            else:
+                return None
+        except OSError as err:
+            logger.error("OS error: {0}".format(err))
