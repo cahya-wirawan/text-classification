@@ -80,7 +80,8 @@ class TextClassificationServer(object):
                 classifier['enabled'] = self.cfg['classifier'][classifier_name]['enabled']
                 default_dataset = self.cfg['datasets']['default']
                 classifier['class'] = class_(self.cfg['classifier'][classifier_name],
-                                             self.cfg['datasets'][default_dataset]['categories'])
+                                             self.cfg['datasets'][default_dataset]['categories'],
+                                             default_dataset)
                 TextClassificationServer.classifiers[classifier_name] = classifier
 
     @property
@@ -139,10 +140,10 @@ class TextClassificationServer(object):
                         self.version()
                     elif header[0] == b'RELOAD':
                         self.reload()
-                    elif header[0] == b'LIST_ALGORITHM':
-                        self.list_algoritm()
-                    elif header[0] == b'SET_ALGORITHM':
-                        self.set_algoritm()
+                    elif header[0] == b'LIST_CLASSIFIER':
+                        self.list_classifier()
+                    elif header[0] == b'SET_CLASSIFIER':
+                        self.set_classifier()
                     elif header[0] == b'MD5_FILE':
                         file_name = header[1]
                         self.md5_file(file_name=file_name)
@@ -203,17 +204,17 @@ class TextClassificationServer(object):
             response = b'reload'
             self.send(response)
 
-        def list_algoritm(self):
+        def list_classifier(self):
             response = dict()
             response["status"] = "OK"
-            response["result"] = "list_algoritm"
+            response["result"] = [classifier for classifier in TextClassificationServer.classifiers]
             response = json.dumps(response).encode('utf-8')
             self.send(response)
 
-        def set_algoritm(self):
+        def set_classifier(self):
             response = dict()
             response["status"] = "OK"
-            response["result"] = "set_algoritm"
+            response["result"] = "set_classifier"
             response = json.dumps(response).encode('utf-8')
             self.send(response)
 

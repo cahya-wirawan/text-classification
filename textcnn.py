@@ -95,16 +95,17 @@ class TextCNNEvaluator(object):
     """
      TextCNNEvaluator
      """
-    def __init__(self, cfg):
+    def __init__(self, cfg, current_category):
         self.logger = logging.getLogger(__name__)
         self.cfg = cfg
+        self.current_category = current_category
         self.x_raw = None
         self.x_test = None
         # Map data into vocabulary
-        self.vocab_path = os.path.join(self.cfg['training_dir'], "vocab")
+        self.vocab_path = os.path.join(self.cfg['training_dir'][self.current_category], "vocab")
         self.vocab_processor = learn.preprocessing.VocabularyProcessor.restore(self.vocab_path)
 
-        checkpoint_file = tf.train.latest_checkpoint(self.cfg['training_dir'] + "/checkpoints")
+        checkpoint_file = tf.train.latest_checkpoint(self.cfg['training_dir'][self.current_category] + "/checkpoints")
         graph = tf.Graph()
         with graph.as_default():
             session_conf = tf.ConfigProto(

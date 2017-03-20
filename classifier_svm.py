@@ -9,10 +9,11 @@ from classifier import Classifier
 
 class ClassifierSvm(Classifier):
 
-    def __init__(self, cfg=None, categories=None):
+    def __init__(self, cfg=None, categories=None, current_category=None):
         super().__init__()
         self.categories = categories
-        self.clf = joblib.load(cfg['training_file'])
+        self.current_category = current_category
+        self.clf = joblib.load(cfg['training_file'][self.current_category])
 
     def fit(self, dataset, filename):
         self.logger.debug("fit")

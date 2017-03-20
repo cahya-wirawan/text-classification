@@ -1,14 +1,20 @@
 classifier:
   bayesian:
     enabled: True
-    training_file: data/bayesian/20newsgroup/201700301_090000.pkl
+    training_file:
+      mrpolarity: data/bayesian/mrpolarity/201700301_090000.pkl
+      20newsgroup: data/bayesian/20newsgroup/201700301_090000.pkl
   svm:
     enabled: True
-    training_file: data/svm/20newsgroup/201700301_090000.pkl
+    training_file:
+      mrpolarity: data/svm/mrpolarity/201700301_090000.pkl
+      20newsgroup: data/svm/20newsgroup/201700301_090000.pkl
   cnn:
     enabled: True
     batch_size: 64
-    training_dir: data/cnn/20newsgroup/201700301_090000
+    training_dir:
+      mrpolarity: data/cnn/mrpolarity/201700301_090000
+      20newsgroup: data/cnn/20newsgroup/201700301_090000
     allow_soft_placement: True
     log_device_placement: False
 
