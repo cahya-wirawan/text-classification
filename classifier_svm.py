@@ -11,13 +11,15 @@ class ClassifierSvm(Classifier):
 
     def __init__(self, cfg=None, categories=None):
         super().__init__()
-        self.clf = Pipeline([('vect', CountVectorizer()),
-                            ('tfidf', TfidfTransformer()),
-                            ('clf', SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3, n_iter=   5, random_state=42)),
-                            ])
+        self.categories = categories
+        self.clf = joblib.load(cfg['training_file'])
 
     def fit(self, dataset, filename):
         self.logger.debug("fit")
+        self.clf = Pipeline([('vect', CountVectorizer()),
+                             ('tfidf', TfidfTransformer()),
+                             ('clf', SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3, n_iter=5, random_state=42)),
+                             ])
         self.clf.fit(dataset.get_dataset()['data'], dataset.get_dataset()['target'])
         joblib.dump(self.clf, filename, compress=9)
 
@@ -28,6 +30,7 @@ class ClassifierSvm(Classifier):
     def predict(self, data):
         self.logger.debug("predict")
         predicted = self.clf.predict(data)
+        predicted = [self.categories[i] for i in predicted]
         return predicted
         # self.logger.debug('SVM correct prediction: {:4.2f}'.format(np.mean(predicted == twenty_test.target)))
         # self.logger.debug(metrics.classification_report(twenty_test.target, predicted, target_names=twenty_test.target_names))

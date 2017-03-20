@@ -1,14 +1,14 @@
 classifier:
   bayesian:
-    enabled: False
-    training_file: data/bayesian/201700301_090000.pkl
+    enabled: True
+    training_file: data/bayesian/20newsgroup/201700301_090000.pkl
   svm:
-    enabled: False
-    training_file: data/svm/201700301_090000.pkl
+    enabled: True
+    training_file: data/svm/20newsgroup/201700301_090000.pkl
   cnn:
     enabled: True
     batch_size: 64
-    training_dir: data/cnn/201700301_090000
+    training_dir: data/cnn/20newsgroup/201700301_090000
     allow_soft_placement: True
     log_device_placement: False
 
@@ -27,7 +27,7 @@ word_embeddings:
 
 datasets:
   # Support currently 3 datasets: mrpolarity, 20newsgroup and localdata
-  default: mrpolarity
+  default: 20newsgroup
   mrpolarity:
     categories:
       - positive_data

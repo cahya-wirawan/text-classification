@@ -8,7 +8,8 @@ class ClassifierCnn(Classifier):
     def __init__(self, cfg=None, categories=None):
         super().__init__()
         self.logger = logging.getLogger(__name__)
-        self.evaluator = TextCNNEvaluator(cfg, categories)
+        self.categories = categories
+        self.evaluator = TextCNNEvaluator(cfg)
 
     def fit(self, dataset, filename):
         self.logger.info("train")
@@ -18,5 +19,6 @@ class ClassifierCnn(Classifier):
 
     def predict(self, data):
         self.logger.info("predict")
-        result = self.evaluator.predict(data)
-        return result
+        predicted = self.evaluator.predict(data)
+        predicted = [self.categories[i] for i in predicted]
+        return predicted

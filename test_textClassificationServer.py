@@ -19,9 +19,13 @@ class TestTextClassificationServer(unittest.TestCase):
     data = b"Text Classification"*1000
     # md5sum = md5(data).hexdigest()
     md5sum = "4b1c78bb298ef3d3d3ee9a244cb5e0c6"
-    x_raw = ["an idealistic love story that brings out the latent 15 year old romantic in everyone",
-             "there are enough moments of heartbreaking honesty to keep one glued to the screen",
-             "the kind of nervous film that will either give you a mild headache or exhilarate you"]
+    x_raw = ["We would like to convert a group of these outlines into a 3D image. Someone mentioned that if we could \
+                convert the TIFF into a vector format then we could view them in Autocad",
+             "We do baptize converts, but no one who has been deceived into hearing the word is likely to be \
+                a convert. If in fact the grace of God might work in such a situation, there is no harm done in \
+                waiting a day or two",
+             "Chronic persistent hepatitis is usually diagnosed when someone does a liver biopsy on a patient \
+                that has persistently elevated serum transaminases months after a bout of acute viral hepatitis"]
 
     @classmethod
     def setUpClass(cls):
@@ -79,7 +83,9 @@ class TestTextClassificationServer(unittest.TestCase):
         end = time.time()
         self.logger.debug("Time elapsed: {}".format(end - start))
         self.logger.debug("{}: {}".format(self._testMethodName, response))
-        self.assertEqual({'cnn': ['positive_data']}, response['result'])
+        self.assertEqual({'bayesian': ['comp.graphics',],
+                          'cnn': ['comp.graphics'],
+                          'svm': ['comp.graphics']}, response['result'])
 
     def test_predict_stream_1(self):
         start = time.time()
@@ -88,7 +94,9 @@ class TestTextClassificationServer(unittest.TestCase):
         end = time.time()
         self.logger.debug("Time elapsed: {}".format(end - start))
         self.logger.debug("{}: {}".format(self._testMethodName, response))
-        self.assertEqual({'cnn': ['positive_data']}, response['result'])
+        self.assertEqual({'bayesian': ['soc.religion.christian'],
+                          'cnn': ['soc.religion.christian'],
+                          'svm': ['soc.religion.christian']}, response['result'])
 
     def test_predict_stream_2(self):
         start = time.time()
@@ -97,7 +105,9 @@ class TestTextClassificationServer(unittest.TestCase):
         end = time.time()
         self.logger.debug("Time elapsed: {}".format(end - start))
         self.logger.debug("{}: {}".format(self._testMethodName, response))
-        self.assertEqual({'cnn': ['positive_data', 'positive_data', 'negative_data']},
+        self.assertEqual({'bayesian': ['comp.graphics', 'soc.religion.christian', 'sci.med'],
+                          'cnn': ['comp.graphics', 'soc.religion.christian', 'sci.med'],
+                          'svm': ['comp.graphics', 'soc.religion.christian', 'sci.med']},
                          response['result'])
 
     def test_predict_file(self):
@@ -109,7 +119,9 @@ class TestTextClassificationServer(unittest.TestCase):
         response = json.loads(response.decode('utf-8'))
         os.remove(temp_path)
         self.logger.debug("{}: {}".format(self._testMethodName, response))
-        self.assertEqual({'cnn': ['positive_data']}, response['result'])
+        self.assertEqual({'bayesian': ['soc.religion.christian'],
+                          'cnn': ['soc.religion.christian'],
+                          'svm': ['soc.religion.christian']}, response['result'])
 
     def test_predict_file_multilines(self):
         fd, temp_path = tempfile.mkstemp()
@@ -120,7 +132,9 @@ class TestTextClassificationServer(unittest.TestCase):
         response = json.loads(response.decode('utf-8'))
         os.remove(temp_path)
         self.logger.debug("{}: {}".format(self._testMethodName, response))
-        self.assertEqual({'cnn': ['positive_data', 'positive_data', 'negative_data']},
+        self.assertEqual({'bayesian': ['comp.graphics', 'soc.religion.christian', 'sci.med'],
+                          'cnn': ['comp.graphics', 'soc.religion.christian', 'sci.med'],
+                          'svm': ['comp.graphics', 'soc.religion.christian', 'sci.med']},
                          response['result'])
 
     def test_unknown_command(self):

@@ -95,10 +95,9 @@ class TextCNNEvaluator(object):
     """
      TextCNNEvaluator
      """
-    def __init__(self, cfg, categories):
+    def __init__(self, cfg):
         self.logger = logging.getLogger(__name__)
         self.cfg = cfg
-        self.categories = categories
         self.x_raw = None
         self.x_test = None
         # Map data into vocabulary
@@ -137,11 +136,11 @@ class TextCNNEvaluator(object):
         all_predictions = []
 
         for x_test_batch in batches:
-            batch_predictions = self.sess.run(self.predictions, {self.input_x: x_test_batch, self.dropout_keep_prob: 1.0})
+            batch_predictions = self.sess.run(self.predictions,
+                                              {self.input_x: x_test_batch, self.dropout_keep_prob: 1.0})
             all_predictions = np.concatenate([all_predictions, batch_predictions])
 
         response = [int(i) for i in all_predictions]
-        response = [self.categories[i] for i in response]
         end = time.time()
         self.logger.debug("Predict time: {} seconds".format(end - start))
         self.logger.debug("Response: {}".format(response))
