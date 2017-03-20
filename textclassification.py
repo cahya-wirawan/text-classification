@@ -11,10 +11,6 @@ import struct
 import json
 import logging
 import yaml
-import classifier
-from classifier_bayesian import ClassifierBayesian
-from classifier_svm import ClassifierSvm
-from classifier_cnn import ClassifierCnn
 from setup_logging import setup_logging
 from _version import __version__
 
@@ -76,10 +72,9 @@ class TextClassificationServer(object):
         self.__timeout = timeout
         self.server = None
         for classifier_name in self.cfg['classifier']:
-            #module = __import__("socket")
-            class_name = "Classifier" + classifier_name.title()
-            class_ = globals()[class_name]
-            # class_ = getattr(module, "Classifier" + classifier_name.title())
+            module_name = "classifier_" + classifier_name
+            module = __import__(module_name)
+            class_ = getattr(module, ''.join(module_name.title().split('_')))
             if class_ is not None:
                 classifier = dict()
                 classifier['enabled'] = self.cfg['classifier'][classifier_name]['enabled']
