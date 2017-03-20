@@ -1,7 +1,6 @@
 import os
 import tensorflow as tf
 import numpy as np
-import yaml
 from tensorflow.contrib import learn
 import textcnn_datahelpers
 import time
@@ -96,25 +95,22 @@ class TextCNNEvaluator(object):
     """
      TextCNNEvaluator
      """
-    cfg = None
-
-    def __init__(self):
+    def __init__(self, cfg, categories):
         self.logger = logging.getLogger(__name__)
-        with open("config.yml", 'r') as ymlfile:
-            self.cfg = yaml.load(ymlfile)
-
+        self.cfg = cfg
+        self.categories = categories
         self.x_raw = None
         self.x_test = None
         # Map data into vocabulary
-        self.vocab_path = os.path.join(self.cfg['textcnn']['training_dir'], "vocab")
+        self.vocab_path = os.path.join(self.cfg['training_dir'], "vocab")
         self.vocab_processor = learn.preprocessing.VocabularyProcessor.restore(self.vocab_path)
 
-        checkpoint_file = tf.train.latest_checkpoint(self.cfg['textcnn']['training_dir'] + "/checkpoints")
+        checkpoint_file = tf.train.latest_checkpoint(self.cfg['training_dir'] + "/checkpoints")
         graph = tf.Graph()
         with graph.as_default():
             session_conf = tf.ConfigProto(
-                allow_soft_placement=self.cfg['textcnn']['allow_soft_placement'],
-                log_device_placement=self.cfg['textcnn']['log_device_placement'])
+                allow_soft_placement=self.cfg['allow_soft_placement'],
+                log_device_placement=self.cfg['log_device_placement'])
             self.sess = tf.Session(config=session_conf)
             with self.sess.as_default():
                 # Load the saved meta graph and restore variables
@@ -135,7 +131,7 @@ class TextCNNEvaluator(object):
         self.x_test = np.array(list(self.vocab_processor.transform(self.x_raw)))
 
         # Generate batches for one epoch
-        batches = textcnn_datahelpers.batch_iter(list(self.x_test), self.cfg['textcnn']['batch_size'], 1, shuffle=False)
+        batches = textcnn_datahelpers.batch_iter(list(self.x_test), self.cfg['batch_size'], 1, shuffle=False)
 
         # Collect the predictions here
         all_predictions = []
@@ -145,8 +141,7 @@ class TextCNNEvaluator(object):
             all_predictions = np.concatenate([all_predictions, batch_predictions])
 
         response = [int(i) for i in all_predictions]
-        dataset_name = self.cfg["datasets"]["default"]
-        response = [self.cfg['datasets'][dataset_name]['categories'][i] for i in response]
+        response = [self.categories[i] for i in response]
         end = time.time()
         self.logger.debug("Predict time: {} seconds".format(end - start))
         self.logger.debug("Response: {}".format(response))

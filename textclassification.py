@@ -10,8 +10,12 @@ import hashlib
 import struct
 import json
 import logging
+import yaml
+import classifier
+from classifier_bayesian import ClassifierBayesian
+from classifier_svm import ClassifierSvm
+from classifier_cnn import ClassifierCnn
 from setup_logging import setup_logging
-from textcnn import TextCNNEvaluator, TextCNN
 from _version import __version__
 
 
@@ -55,7 +59,7 @@ class TextClassificationServer(object):
     """
     Class for using TextClassificationServer with a network socket
     """
-    evaluator = None
+    classifiers = dict()
 
     def __init__(self, host='127.0.0.1', port=3333, timeout=None):
         """
@@ -65,11 +69,24 @@ class TextClassificationServer(object):
         timeout (float or None) : socket timeout
         """
         self.logger = logging.getLogger(__name__)
+        with open("config.yml", 'r') as ymlfile:
+            self.cfg = yaml.load(ymlfile)
         self.__host = host
         self.__port = port
         self.__timeout = timeout
         self.server = None
-        TextClassificationServer.evaluator = TextCNNEvaluator()
+        for classifier_name in self.cfg['classifier']:
+            #module = __import__("socket")
+            class_name = "Classifier" + classifier_name.title()
+            class_ = globals()[class_name]
+            # class_ = getattr(module, "Classifier" + classifier_name.title())
+            if class_ is not None:
+                classifier = dict()
+                classifier['enabled'] = self.cfg['classifier'][classifier_name]['enabled']
+                default_dataset = self.cfg['datasets']['default']
+                classifier['class'] = class_(self.cfg['classifier'][classifier_name],
+                                             self.cfg['datasets'][default_dataset]['categories'])
+                TextClassificationServer.classifiers[classifier_name] = classifier
 
     @property
     def host(self):
@@ -116,7 +133,7 @@ class TextClassificationServer(object):
                 cur_thread = threading.current_thread()
                 while True:
                     data = self.receive()
-                    if data == None:
+                    if data is None:
                         break
                     data = data.rstrip()
                     self.logger.info("Thread {} received: {}".format(cur_thread.name, data))
@@ -239,7 +256,6 @@ class TextClassificationServer(object):
             self.send(response)
 
         def predict_stream(self):
-            evaluator = TextClassificationServer.evaluator
             stream = b''
             while True:
                 data = self.receive()
@@ -251,17 +267,28 @@ class TextClassificationServer(object):
             multi_line = stream.split('\n')
             response = dict()
             response["status"] = "OK"
-            response["result"] = evaluator.predict(multi_line)
+            result = dict()
+            for classifier_name in TextClassificationServer.classifiers.keys():
+                if TextClassificationServer.classifiers[classifier_name]['enabled']:
+                    result[classifier_name] = TextClassificationServer.classifiers[classifier_name]['class'].predict(multi_line)
+                else:
+                    result[classifier_name] = None
+            response["result"] = result
             response = json.dumps(response).encode('utf-8')
             self.send(response)
 
         def predict_file(self, file_name=None):
-            evaluator = TextClassificationServer.evaluator
             data = open(file_name, 'rb').read().decode('utf-8')
             multi_line = data.split('\n')
             response = dict()
             response["status"] = "OK"
-            response["result"] = evaluator.predict(multi_line)
+            result = dict()
+            for classifier_name in TextClassificationServer.classifiers.keys():
+                if TextClassificationServer.classifiers[classifier_name]['enabled']:
+                    result[classifier_name] = TextClassificationServer.classifiers[classifier_name]['class'].predict(multi_line)
+                else:
+                    result[classifier_name] = None
+            response["result"] = result
             response = json.dumps(response).encode('utf-8')
             self.send(response)
 
