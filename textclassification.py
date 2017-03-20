@@ -270,9 +270,8 @@ class TextClassificationServer(object):
             result = dict()
             for classifier_name in TextClassificationServer.classifiers.keys():
                 if TextClassificationServer.classifiers[classifier_name]['enabled']:
-                    result[classifier_name] = TextClassificationServer.classifiers[classifier_name]['class'].predict(multi_line)
-                else:
-                    result[classifier_name] = None
+                    result[classifier_name] = \
+                        TextClassificationServer.classifiers[classifier_name]['class'].predict(multi_line)
             response["result"] = result
             response = json.dumps(response).encode('utf-8')
             self.send(response)
@@ -285,9 +284,8 @@ class TextClassificationServer(object):
             result = dict()
             for classifier_name in TextClassificationServer.classifiers.keys():
                 if TextClassificationServer.classifiers[classifier_name]['enabled']:
-                    result[classifier_name] = TextClassificationServer.classifiers[classifier_name]['class'].predict(multi_line)
-                else:
-                    result[classifier_name] = None
+                    result[classifier_name] = \
+                        TextClassificationServer.classifiers[classifier_name]['class'].predict(multi_line)
             response["result"] = result
             response = json.dumps(response).encode('utf-8')
             self.send(response)
