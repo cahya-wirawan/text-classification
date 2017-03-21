@@ -57,7 +57,7 @@ class TextClassificationServer(object):
     """
     classifiers = dict()
 
-    def __init__(self, host='127.0.0.1', port=3333, timeout=None):
+    def __init__(self, host=None, port=None, timeout=None):
         """
         class initialisation
         host (string) : hostname or ip address
@@ -67,9 +67,18 @@ class TextClassificationServer(object):
         self.logger = logging.getLogger(__name__)
         with open("config.yml", 'r') as ymlfile:
             self.cfg = yaml.load(ymlfile)
-        self.__host = host
-        self.__port = port
-        self.__timeout = timeout
+        if host is None:
+            self.__host = self.cfg['server']['host']
+        else:
+            self.__host = host
+        if port is None:
+            self.__port = self.cfg['server']['port']
+        else:
+            self.__port = port
+        if timeout is None:
+            self.__timeout = self.cfg['server']['timeout']
+        else:
+            self.__timeout = timeout
         self.server = None
         for classifier_name in self.cfg['classifier']:
             module_name = "classifier_" + classifier_name
@@ -209,8 +218,8 @@ class TextClassificationServer(object):
         def list_classifier(self):
             response = dict()
             response["status"] = "OK"
-            response["result"] = [{classifier:TextClassificationServer.classifiers[classifier]['enabled']}
-                                  for classifier in TextClassificationServer.classifiers]
+            response["result"] = {classifier: TextClassificationServer.classifiers[classifier]['enabled']
+                                  for classifier in TextClassificationServer.classifiers}
             response = json.dumps(response).encode('utf-8')
             self.send(response)
 

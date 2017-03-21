@@ -63,14 +63,14 @@ class TestTextClassificationServer(unittest.TestCase):
         response = self.tcc.command("LIST_CLASSIFIER\n")
         response = json.loads(response.decode('utf-8'))
         self.logger.debug("{}: {}".format(self._testMethodName, response))
-        self.assertEqual([{'bayesian': True}, {'svm': True}, {'cnn': True}], response['result'])
+        self.assertEqual({'cnn': True, 'bayesian': True, 'svm': True}, response['result'])
 
     def test_set_classifier(self):
-        response = self.tcc.command("SET_CLASSIFIER:bayesian:false\n")
+        response = self.tcc.command("SET_CLASSIFIER:bayesian:False\n")
         response = json.loads(response.decode('utf-8'))
         self.logger.debug("{}: {}".format(self._testMethodName, response))
         self.assertEqual([{'bayesian': False}], response['result'])
-        response = self.tcc.command("SET_CLASSIFIER:bayesian:true\n")
+        response = self.tcc.command("SET_CLASSIFIER:bayesian:True\n")
         response = json.loads(response.decode('utf-8'))
         self.logger.debug("{}: {}".format(self._testMethodName, response))
         self.assertEqual([{'bayesian': True}], response['result'])

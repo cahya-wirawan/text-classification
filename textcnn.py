@@ -114,6 +114,7 @@ class TextCNNEvaluator(object):
             self.sess = tf.Session(config=session_conf)
             with self.sess.as_default():
                 # Load the saved meta graph and restore variables
+                self.logger.debug("Load the checkpoint: {}".format(checkpoint_file))
                 saver = tf.train.import_meta_graph("{}.meta".format(checkpoint_file))
                 saver.restore(self.sess, checkpoint_file)
 
