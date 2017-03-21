@@ -9,6 +9,10 @@ supported:
 The engine is running as a server listening on command and text to be classified. By default it listens on localhost 
 port 3333, but it can be changed in the yaml configuration file. 
 
+## Requirements
+- Python 3.0 or newer
+- Tensorflow 1.0 or newer 
+
 ## textclassificationd.py
 
 ### synopsis
@@ -34,8 +38,8 @@ Print the program version
 Reload the engine
 
 #### LIST_CLASSIFIER
-List the supported classifier (at the moment there are three classifiers 
-are supported: Bayesian, Support Vector Machine and Convolutional Neural Network). It shows also 
+List the supported classifiers (at the moment there are three classifiers
+supported: Bayesian, Support Vector Machine and Convolutional Neural Network). It shows also 
 the status of classifier, either True (enabled) or False (disabled).
 
 #### SET_CLASSIFIER
