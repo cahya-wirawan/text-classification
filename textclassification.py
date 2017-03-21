@@ -65,7 +65,7 @@ class TextClassificationServer(object):
         timeout (float or None) : socket timeout
         """
         self.logger = logging.getLogger(__name__)
-        with open("config.yml", 'r') as ymlfile:
+        with open("textclassification.yml", 'r') as ymlfile:
             self.cfg = yaml.load(ymlfile)
         if host is None:
             self.__host = self.cfg['server']['host']

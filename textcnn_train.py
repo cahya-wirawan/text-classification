@@ -41,7 +41,7 @@ for attr, value in sorted(FLAGS.__flags.items()):
     print("{}={}".format(attr.upper(), value))
 print("")
 
-with open("config.yml", 'r') as ymlfile:
+with open("textclassification.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
 
 dataset_name = cfg["datasets"]["default"]

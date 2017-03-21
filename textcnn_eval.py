@@ -12,7 +12,7 @@ import csv
 from sklearn import metrics
 import yaml
 
-with open("config.yml", 'r') as ymlfile:
+with open("textclassification.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
 
 # Parameters
