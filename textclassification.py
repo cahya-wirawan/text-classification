@@ -143,7 +143,9 @@ class TextClassificationServer(object):
                     elif header[0] == b'LIST_CLASSIFIER':
                         self.list_classifier()
                     elif header[0] == b'SET_CLASSIFIER':
-                        self.set_classifier()
+                        classifier = header[1].decode('utf-8')
+                        value = header[2].decode('utf-8')
+                        self.set_classifier(classifier, value)
                     elif header[0] == b'MD5_FILE':
                         file_name = header[1]
                         self.md5_file(file_name=file_name)
@@ -207,14 +209,21 @@ class TextClassificationServer(object):
         def list_classifier(self):
             response = dict()
             response["status"] = "OK"
-            response["result"] = [classifier for classifier in TextClassificationServer.classifiers]
+            response["result"] = [{classifier:TextClassificationServer.classifiers[classifier]['enabled']}
+                                  for classifier in TextClassificationServer.classifiers]
             response = json.dumps(response).encode('utf-8')
             self.send(response)
 
-        def set_classifier(self):
+        def set_classifier(self, classifier, value):
             response = dict()
             response["status"] = "OK"
-            response["result"] = "set_classifier"
+            if value.lower() == "true":
+                TextClassificationServer.classifiers[classifier]['enabled'] = True
+            elif value.lower() == "false":
+                TextClassificationServer.classifiers[classifier]['enabled'] = False
+            else:
+                response["status"] = "ERROR"
+            response["result"] = [{classifier: TextClassificationServer.classifiers[classifier]['enabled']}]
             response = json.dumps(response).encode('utf-8')
             self.send(response)
 
@@ -388,3 +397,11 @@ class TextClassificationClient(object):
                 return None
         except OSError as err:
             logger.error("OS error: {0}".format(err))
+
+    def set_classifier(self, classifier=None, value=None):
+        logger = logging.getLogger(__name__)
+        command = "SET_CLASSIFIER:{}:{}\n".format(classifier, value)
+        self.simple_socket.send(command.encode('utf-8'))
+        response = self.simple_socket.receive()
+        logger.debug("Client Received: {}".format(response))
+        return response

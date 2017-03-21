@@ -63,7 +63,17 @@ class TestTextClassificationServer(unittest.TestCase):
         response = self.tcc.command("LIST_CLASSIFIER\n")
         response = json.loads(response.decode('utf-8'))
         self.logger.debug("{}: {}".format(self._testMethodName, response))
-        self.assertEqual(['cnn', 'svm', 'bayesian'], response['result'])
+        self.assertEqual([{'bayesian': True}, {'svm': True}, {'cnn': True}], response['result'])
+
+    def test_set_classifier(self):
+        response = self.tcc.command("SET_CLASSIFIER:bayesian:false\n")
+        response = json.loads(response.decode('utf-8'))
+        self.logger.debug("{}: {}".format(self._testMethodName, response))
+        self.assertEqual([{'bayesian': False}], response['result'])
+        response = self.tcc.command("SET_CLASSIFIER:bayesian:true\n")
+        response = json.loads(response.decode('utf-8'))
+        self.logger.debug("{}: {}".format(self._testMethodName, response))
+        self.assertEqual([{'bayesian': True}], response['result'])
 
     def test_md5_file(self):
         fd, temp_path = tempfile.mkstemp()
