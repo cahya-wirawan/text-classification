@@ -4,8 +4,7 @@ from dataset import Dataset
 
 class DatasetGeneric(Dataset):
 
-    def __init__(self, container_path=None, categories=None, load_content=True,
-                 encoding='utf-8', shuffle=True, random_state=42):
+    def __init__(self, cfg=None):
         """
         Load text files with categories as subfolder names.
         Individual samples are assumed to be files stored a two levels folder structure.
@@ -16,6 +15,7 @@ class DatasetGeneric(Dataset):
         :return: data and labels of the dataset
         """
         super().__init__()
-        self.__dataset__ = load_files(container_path=container_path, categories=categories,
-                                  load_content=load_content, shuffle=shuffle, encoding=encoding,
-                                  random_state=random_state)
+        self.__dataset__ = load_files(container_path=cfg['container_path'], categories=cfg['categories'],
+                                      load_content=cfg['load_content'], shuffle=cfg['shuffle'],
+                                      encoding=cfg['encoding'], random_state=cfg['random_state'])
+

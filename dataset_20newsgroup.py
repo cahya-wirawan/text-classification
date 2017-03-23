@@ -2,8 +2,10 @@ from sklearn.datasets import fetch_20newsgroups
 from dataset import Dataset
 
 
-class Dataset20newsgroup(Dataset):
+class Dataset20Newsgroup(Dataset):
 
-    def __init__(self, subset='train', categories=None, shuffle=True, random_state=42):
+    def __init__(self, cfg=None):
         super().__init__()
-        self.__dataset__ = fetch_20newsgroups(subset=subset, categories=categories, shuffle=shuffle, random_state=random_state)
+        self.__dataset__ = fetch_20newsgroups(subset=cfg['subset'], categories=cfg['categories'],
+                                              shuffle=cfg['shuffle'], random_state=cfg['random_state'])
+

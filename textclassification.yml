@@ -1,25 +1,20 @@
-server:
-  host: localhost
-  port: 3333
-  timeout:
-
-classifier:
+classifier: &classifier
   bayesian:
     enabled: True
     training_file:
-      mrpolarity: data/bayesian/mrpolarity/201700301_090000.pkl
-      20newsgroup: data/bayesian/20newsgroup/201700301_090000.pkl
+      mrpolarity: data/bayesian_mrpolarity_20170323_142422.pkl
+      20newsgroup: data/bayesian_20newsgroup_20170323_142449.pkl
   svm:
     enabled: True
     training_file:
-      mrpolarity: data/svm/mrpolarity/201700301_090000.pkl
-      20newsgroup: data/svm/20newsgroup/201700301_090000.pkl
+      mrpolarity:  data/svm_mrpolarity_20170323_142422.pkl
+      20newsgroup: data/svm_20newsgroup_20170323_142449.pkl
   cnn:
     enabled: True
     batch_size: 64
     training_dir:
-      mrpolarity: data/cnn/mrpolarity/201700301_090000
-      20newsgroup: data/cnn/20newsgroup/201700301_090000
+      mrpolarity: data/cnn_mrpolarity_20170301_090000
+      20newsgroup: data/cnn_20newsgroup_20170301_090000
     allow_soft_placement: True
     log_device_placement: False
 
@@ -28,18 +23,19 @@ word_embeddings:
   # Just set the default to empty string to disable the word embeddings
   default: word2vec
   word2vec:
-    path: ../../data/GoogleNews-vectors-negative300.bin
+    path: data/word_embeddings/GoogleNews-vectors-negative300.bin
     dimension: 300
     binary: True
   glove:
-    path: ../../data/glove.6B.100d.txt
+    path: data/word_embeddings/glove.6B.100d.txt
     dimension: 100
     length: 400000
 
 datasets:
   # Support currently 3 datasets: mrpolarity, 20newsgroup and localdata
   default: 20newsgroup
-  mrpolarity:
+  mrpolarity: &mrpolarity
+    name: mrpolarity
     categories:
       - positive_data
       - negative_data
@@ -49,21 +45,38 @@ datasets:
     negative_data_file:
       path: "data/rt-polaritydata/rt-polarity.neg"
       info: "Data source for the negative data"
-  20newsgroup:
+  20newsgroup: &20newsgroup
     # The dataset includes following 20 newsgroups:
-    # alt.atheism, comp.windows.x, rec.sport.hockey, soc.religion.christian
-    # comp.graphics, misc.forsale, sci.crypt, talk.politics.guns
-    # comp.os.ms-windows.misc, rec.autos, sci.electronics, talk.politics.mideast
-    # comp.sys.ibm.pc.hardware, rec.motorcycles, sci.med, talk.politics.misc
-    # comp.sys.mac.hardware, rec.sport.baseball, sci.space, talk.religion.misc
+    # alt.atheism,
+    # comp.graphics,
+    # comp.os.ms-windows.misc,
+    # comp.sys.ibm.pc.hardware,
+    # comp.sys.mac.hardware,
+    # comp.windows.x,
+    # misc.forsale,
+    # rec.autos,
+    # rec.motorcycles,
+    # rec.sport.baseball,
+    # rec.sport.hockey,
+    # sci.crypt,
+    # sci.electronics,
+    # sci.med,
+    # sci.space,
+    # soc.religion.christian,
+    # talk.politics.guns,
+    # talk.politics.mideast,
+    # talk.politics.misc,
+    # talk.religion.misc
+    name: 20newsgroup
     categories:
       - alt.atheism
       - comp.graphics
       - sci.med
       - soc.religion.christian
+    subset: test
     shuffle: True
     random_state: 42
-  localdata:
+  generic: &generic
     # Load text files with categories as subfolder names.
     # Individual samples are assumed to be files stored
     # a two levels folder structure such as the following:
@@ -77,8 +90,24 @@ datasets:
     # https://archive.ics.uci.edu/ml/datasets/Sentence+Classification
     # has been used. The dataset includes following 3 domains:
     # arxiv, jdm and plos
+    name: generic
     container_path: ../../data/SentenceCorpus
     categories:
+    load_content:
     shuffle: True
     random_state: 42
+    encoding: 'utf-8'
 
+server:
+  host: localhost
+  port: 3333
+  timeout:
+  dataset: *20newsgroup
+  classifier: *classifier
+
+training:
+  data_dir: data
+  dataset:
+    <<: *20newsgroup
+    subset: train
+  classifier: *classifier

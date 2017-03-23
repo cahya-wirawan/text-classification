@@ -3,16 +3,16 @@ from dataset import Dataset
 
 class DatasetMrpolarity(Dataset):
 
-    def __init__(self, positive_data_file, negative_data_file):
+    def __init__(self, cfg=None):
         """
         Loads MR polarity data from files, splits the data into words and generates labels.
         Returns split sentences and labels.
         """
         super().__init__()
         # Load data from files
-        positive_examples = list(open(positive_data_file, "r").readlines())
+        positive_examples = list(open(cfg['positive_data_file']['path'], "r").readlines())
         positive_examples = [s.strip() for s in positive_examples]
-        negative_examples = list(open(negative_data_file, "r").readlines())
+        negative_examples = list(open(cfg['negative_data_file']['path'], "r").readlines())
         negative_examples = [s.strip() for s in negative_examples]
 
         self.__dataset__ = dict()

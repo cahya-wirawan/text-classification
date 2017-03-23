@@ -8,11 +8,12 @@ from classifier import Classifier
 
 class ClassifierSvm(Classifier):
 
-    def __init__(self, cfg=None, categories=None, current_category=None):
+    def __init__(self, cfg=None, categories=None, current_category=None, load=True):
         super().__init__()
         self.categories = categories
         self.current_category = current_category
-        self.clf = joblib.load(cfg['training_file'][self.current_category])
+        if load:
+            self.clf = joblib.load(cfg['training_file'][self.current_category])
 
     def fit(self, dataset, filename):
         self.logger.debug("fit")

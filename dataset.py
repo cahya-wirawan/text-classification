@@ -55,3 +55,10 @@ class Dataset(ABC):
 
     def get_dataset(self):
         return self.__dataset__
+
+    @staticmethod
+    def create_dataset(dataset):
+        class_ = getattr(__import__("dataset_" + dataset['name'] ),
+                         "Dataset" + dataset['name'].title())
+        instance = class_(dataset)
+        return instance

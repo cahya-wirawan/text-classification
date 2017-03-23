@@ -5,12 +5,13 @@ from classifier import Classifier
 
 class ClassifierCnn(Classifier):
 
-    def __init__(self, cfg=None, categories=None, current_category=None):
+    def __init__(self, cfg=None, categories=None, current_category=None, load=True):
         super().__init__()
         self.logger = logging.getLogger(__name__)
         self.categories = categories
         self.current_category = current_category
-        self.evaluator = TextCNNEvaluator(cfg, self.current_category)
+        if load:
+            self.evaluator = TextCNNEvaluator(cfg, self.current_category)
 
     def fit(self, dataset, filename):
         self.logger.info("train")
