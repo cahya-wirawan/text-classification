@@ -80,7 +80,7 @@ class TextClassificationServer(object):
         else:
             self.__timeout = timeout
         self.server = None
-        for classifier_name in self.cfg['classifier']:
+        for classifier_name in self.cfg['classifiers']:
             if classifier_name == "default":
                 continue
             module_name = "classifier_" + classifier_name
@@ -88,9 +88,9 @@ class TextClassificationServer(object):
             class_ = getattr(module, ''.join(module_name.title().split('_')))
             if class_ is not None:
                 classifier = dict()
-                classifier['enabled'] = self.cfg['classifier'][classifier_name]['enabled']
+                classifier['enabled'] = self.cfg['classifiers'][classifier_name]['enabled']
                 default_dataset = self.cfg['datasets']['default']
-                classifier['class'] = class_(self.cfg['classifier'][classifier_name],
+                classifier['class'] = class_(self.cfg['classifiers'][classifier_name],
                                              self.cfg['datasets'][default_dataset]['categories'],
                                              default_dataset)
                 TextClassificationServer.classifiers[classifier_name] = classifier

@@ -20,7 +20,7 @@ class TextClassificationTraining(object):
         self.logger = logging.getLogger(__name__)
         self.cfg = cfg
 
-        for classifier_name in self.cfg["classifier"]:
+        for classifier_name in self.cfg["classifiers"]:
             if classifier_name == "default":
                 continue
             module_name = "classifier_" + classifier_name
@@ -28,9 +28,9 @@ class TextClassificationTraining(object):
             class_ = getattr(module, ''.join(module_name.title().split('_')))
             if class_:
                 classifier = dict()
-                classifier['enabled'] = self.cfg["classifier"][classifier_name]['enabled']
+                classifier["enabled"] = self.cfg["classifiers"][classifier_name]["enabled"]
                 default_dataset = self.cfg["datasets"]["default"]
-                classifier['class'] = class_(self.cfg["classifier"][classifier_name],
+                classifier["class"] = class_(self.cfg["classifiers"][classifier_name],
                                              self.cfg["datasets"][default_dataset]["categories"],
                                              default_dataset, False)
                 TextClassificationTraining.classifiers[classifier_name] = classifier
@@ -40,7 +40,7 @@ class TextClassificationTraining(object):
         if cn:
             classifier_name = cn
         else:
-            classifier_name = self.cfg["classifier"]["default"]
+            classifier_name = self.cfg["classifiers"]["default"]
         if classifier_name not in TextClassificationTraining.classifiers.keys() and classifier_name != "all":
             print("The classifier {} doesn't exist".format(classifier_name))
             return 1
@@ -56,13 +56,13 @@ class TextClassificationTraining(object):
         TCT = TextClassificationTraining
         if classifier_name == "all":
             for classifier_name in TCT.classifiers:
-                result_name = "{}/{}_{}_{}".format(self.cfg['data_dir'], classifier_name, dataset_name, now)
-                TCT.classifiers[classifier_name]['class'].fit(dataset, result_name)
+                result_name = "{}/{}_{}_{}".format(self.cfg["data_dir"], classifier_name, dataset_name, now)
+                TCT.classifiers[classifier_name]["class"].fit(dataset, result_name)
                 print("The training of {} classifier for the dataset {} is done.".format(classifier_name, dataset_name))
                 print("The result is saved in: {}(.pkl)".format(result_name))
         else:
-            result_name = "{}/{}_{}_{}".format(self.cfg['data_dir'], classifier_name, dataset_name, now)
-            TCT.classifiers[classifier_name]['class'].fit(dataset, result_name)
+            result_name = "{}/{}_{}_{}".format(self.cfg["data_dir"], classifier_name, dataset_name, now)
+            TCT.classifiers[classifier_name]["class"].fit(dataset, result_name)
             print("The training of {} classifier for the dataset {} is done.".format(classifier_name, dataset_name))
             print("The result is saved in: {}(.pkl)".format(result_name))
 
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     with open(args.configuration_file, 'r') as ymlfile:
         cfg = yaml.load(ymlfile)
-    training = TextClassificationTraining(cfg['training'])
+    training = TextClassificationTraining(cfg["training"])
     training.start(cn=args.classifier, dn=args.dataset)
 
 
