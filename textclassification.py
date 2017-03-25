@@ -81,6 +81,8 @@ class TextClassificationServer(object):
             self.__timeout = timeout
         self.server = None
         for classifier_name in self.cfg['classifier']:
+            if classifier_name == "default":
+                continue
             module_name = "classifier_" + classifier_name
             module = __import__(module_name)
             class_ = getattr(module, ''.join(module_name.title().split('_')))

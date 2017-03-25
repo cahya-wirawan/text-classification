@@ -22,7 +22,7 @@ class ClassifierSvm(Classifier):
                              ('clf', SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3, n_iter=5, random_state=42)),
                              ])
         self.clf.fit(dataset.get_dataset()['data'], dataset.get_dataset()['target'])
-        joblib.dump(self.clf, filename, compress=9)
+        joblib.dump(self.clf, filename + ".pkl", compress=9)
 
     def reload(self, filename):
         self.logger.info("reload")

@@ -3,11 +3,11 @@ word_embeddings: &word_embeddings
   # Just set the default to empty string to disable the word embeddings
   default: word2vec
   word2vec:
-    path: data/word_embeddings/GoogleNews-vectors-negative300.bin
+    path: data/input/word_embeddings/GoogleNews-vectors-negative300.bin
     dimension: 300
     binary: True
   glove:
-    path: data/word_embeddings/glove.6B.100d.txt
+    path: data/input/word_embeddings/glove.6B.100d.txt
     dimension: 100
     length: 400000
 
@@ -15,19 +15,19 @@ classifier: &classifier
   bayesian:
     enabled: True
     training_file:
-      mrpolarity: data/bayesian_mrpolarity_20170323_142422.pkl
-      20newsgroup: data/bayesian_20newsgroup_20170323_142449.pkl
+      mrpolarity: data/input/bayesian_mrpolarity_20170323_142422.pkl
+      20newsgroup: data/input/bayesian_20newsgroup_20170323_142449.pkl
   svm:
     enabled: True
     training_file:
-      mrpolarity:  data/svm_mrpolarity_20170323_142422.pkl
-      20newsgroup: data/svm_20newsgroup_20170323_142449.pkl
+      mrpolarity:  data/input/svm_mrpolarity_20170323_142422.pkl
+      20newsgroup: data/input/svm_20newsgroup_20170323_142449.pkl
   cnn:
     enabled: True
     batch_size: 64
     training_dir:
-      mrpolarity: data/cnn_mrpolarity_20170301_090000
-      20newsgroup: data/cnn_20newsgroup_20170301_090000
+      mrpolarity: data/input/cnn_mrpolarity_20170301_090000
+      20newsgroup: data/input/cnn_20newsgroup_20170301_090000
     dev_sample_percentage: 0.1
     word_embeddings: *word_embeddings
     embedding_dim: 128
@@ -52,10 +52,10 @@ datasets: &datasets
       - positive_data
       - negative_data
     positive_data_file:
-      path: "data/rt-polaritydata/rt-polarity.pos"
+      path: "data/input/rt-polaritydata/rt-polarity.pos"
       info: "Data source for the positive data"
     negative_data_file:
-      path: "data/rt-polaritydata/rt-polarity.neg"
+      path: "data/input/rt-polaritydata/rt-polarity.neg"
       info: "Data source for the negative data"
   20newsgroup: &20newsgroup
     # The dataset includes following 20 newsgroups:
@@ -103,7 +103,7 @@ datasets: &datasets
     # has been used. The dataset includes following 3 domains:
     # arxiv, jdm and plos
     name: generic
-    container_path: ../../data/SentenceCorpus
+    container_path: data/input/SentenceCorpus
     categories:
     load_content:
     shuffle: True
@@ -120,11 +120,13 @@ server:
 client:
 
 training:
-  data_dir: data
+  data_dir: data/output
   datasets:
     <<: *datasets
-    default: 20newsgroup
-  classifier: *classifier
+    default: mrpolarity
+  classifier:
+    <<: *classifier
+    default: bayesian
 
 evaluation:
 
