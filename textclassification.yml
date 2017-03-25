@@ -1,3 +1,16 @@
+word_embeddings: &word_embeddings
+  # Two types of word embedding algorithm (word2vec and glove) are supported.
+  # Just set the default to empty string to disable the word embeddings
+  default: word2vec
+  word2vec:
+    path: data/word_embeddings/GoogleNews-vectors-negative300.bin
+    dimension: 300
+    binary: True
+  glove:
+    path: data/word_embeddings/glove.6B.100d.txt
+    dimension: 100
+    length: 400000
+
 classifier: &classifier
   bayesian:
     enabled: True
@@ -15,23 +28,22 @@ classifier: &classifier
     training_dir:
       mrpolarity: data/cnn_mrpolarity_20170301_090000
       20newsgroup: data/cnn_20newsgroup_20170301_090000
+    dev_sample_percentage: 0.1
+    word_embeddings: *word_embeddings
+    embedding_dim: 128
+    filter_sizes: "3,4,5"
+    num_filters: 128
+    dropout_keep_prob: 0.5
+    l2_reg_lambda: 0.0
+    batch_size: 64
+    num_epochs: 200
+    evaluate_every: 100
+    checkpoint_every: 100
+    num_checkpoints: 5
     allow_soft_placement: True
     log_device_placement: False
 
-word_embeddings:
-  # Two types of word embedding algorithm (word2vec and glove) are supported.
-  # Just set the default to empty string to disable the word embeddings
-  default: word2vec
-  word2vec:
-    path: data/word_embeddings/GoogleNews-vectors-negative300.bin
-    dimension: 300
-    binary: True
-  glove:
-    path: data/word_embeddings/glove.6B.100d.txt
-    dimension: 100
-    length: 400000
-
-datasets:
+datasets: &datasets
   # Support currently 3 datasets: mrpolarity, 20newsgroup and localdata
   default: 20newsgroup
   mrpolarity: &mrpolarity
@@ -105,9 +117,14 @@ server:
   dataset: *20newsgroup
   classifier: *classifier
 
+client:
+
 training:
   data_dir: data
-  dataset:
-    <<: *20newsgroup
-    subset: train
+  datasets:
+    <<: *datasets
+    default: 20newsgroup
   classifier: *classifier
+
+evaluation:
+

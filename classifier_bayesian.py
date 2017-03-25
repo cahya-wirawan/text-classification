@@ -23,7 +23,7 @@ class ClassifierBayesian(Classifier):
                              ('clf', MultinomialNB())
                              ])
         self.clf.fit(dataset.get_dataset()['data'], dataset.get_dataset()['target'])
-        joblib.dump(self.clf, filename, compress=9)
+        joblib.dump(self.clf, filename + ".pkl", compress=9)
 
     def reload(self, filename):
         self.logger.info("reload")
@@ -34,5 +34,3 @@ class ClassifierBayesian(Classifier):
         predicted = self.clf.predict(data)
         predicted = [self.categories[i] for i in predicted]
         return predicted
-        # self.logger.debug('Naive Bayes correct prediction: {:4.2f}'.format(np.mean(predicted == twenty_test.target)))
-        # self.logger.debug(metrics.classification_report(twenty_test.target, predicted, target_names=twenty_test.target_names))

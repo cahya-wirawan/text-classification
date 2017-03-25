@@ -1,5 +1,5 @@
 import logging
-from textcnn import TextCNNEvaluator
+from textcnn import TextCNNTraining, TextCNNEvaluator
 from classifier import Classifier
 
 
@@ -8,13 +8,17 @@ class ClassifierCnn(Classifier):
     def __init__(self, cfg=None, categories=None, current_category=None, load=True):
         super().__init__()
         self.logger = logging.getLogger(__name__)
+        self.cfg = cfg
         self.categories = categories
         self.current_category = current_category
         if load:
-            self.evaluator = TextCNNEvaluator(cfg, self.current_category)
+            self.evaluator = TextCNNEvaluator(self.cfg, self.current_category)
+        self.clf = None
 
     def fit(self, dataset, filename):
         self.logger.info("train")
+        self.clf = TextCNNTraining(self.cfg)
+        self.clf.fit(dataset, filename)
 
     def reload(self, filename):
         self.logger.info("reload")
