@@ -13,7 +13,7 @@ class TestTextClassificationServer(unittest.TestCase):
     setup_logging()
     logger = logging.getLogger(__name__)
     run_server = False
-    host, port = "localhost", 3333
+    address, port = "localhost", 3333
     server = None
     tcc = None
     data = b"Text Classification"*1000
@@ -30,10 +30,10 @@ class TestTextClassificationServer(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         TestTextClassificationServer.logger.debug("setUpClass")
-        cls.tcc = TextClassificationClient(address=cls.host, port=cls.port)
+        cls.tcc = TextClassificationClient(address=cls.address, port=cls.port)
         if cls.run_server:
-            cls.server = TextClassificationServer(host=cls.host, port=cls.port)
-            cls.server.start(run_forever=False)
+            cls.server = TextClassificationServer()
+            cls.server.start(run_forever=False, address=cls.address, port=cls.port)
 
     @classmethod
     def tearDownClass(cls):
@@ -164,7 +164,7 @@ class TestTextClassificationServer(unittest.TestCase):
         response = json.loads(response.decode('utf-8'))
         self.logger.debug("{}: {}".format(self._testMethodName, response))
         self.assertEqual('Bye', response['result'])
-        TestTextClassificationServer.tcc = TextClassificationClient(address=self.host, port=self.port)
+        TestTextClassificationServer.tcc = TextClassificationClient(address=self.address, port=self.port)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

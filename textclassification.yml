@@ -111,7 +111,7 @@ datasets: &datasets
     encoding: 'utf-8'
 
 server:
-  host: localhost
+  address: localhost
   port: 3333
   timeout:
   dataset: *20newsgroup

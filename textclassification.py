@@ -56,30 +56,18 @@ class TextClassificationServer(object):
     Class for using TextClassificationServer with a network socket
     """
     classifiers = dict()
+    port = None
 
-    def __init__(self, host=None, port=None, timeout=None):
+    def __init__(self, cfg=None):
         """
         class initialisation
-        host (string) : hostname or ip address
-        port (int) : TCP port
-        timeout (float or None) : socket timeout
         """
         self.logger = logging.getLogger(__name__)
-        with open("textclassification.yml", 'r') as ymlfile:
-            self.cfg = yaml.load(ymlfile)
-        if host is None:
-            self.__host = self.cfg['server']['host']
-        else:
-            self.__host = host
-        if port is None:
-            self.__port = self.cfg['server']['port']
-        else:
-            self.__port = port
-        if timeout is None:
-            self.__timeout = self.cfg['server']['timeout']
-        else:
-            self.__timeout = timeout
+        self.cfg = cfg
         self.server = None
+        self.address = None
+        self.port = None
+        self.timeout = None
         for classifier_name in self.cfg['classifiers']:
             if classifier_name == "default":
                 continue
@@ -89,25 +77,37 @@ class TextClassificationServer(object):
             if class_ is not None:
                 classifier = dict()
                 classifier['enabled'] = self.cfg['classifiers'][classifier_name]['enabled']
-                default_dataset = self.cfg['datasets']['default']
+                dataset_name = self.cfg['dataset']['name']
                 classifier['class'] = class_(self.cfg['classifiers'][classifier_name],
-                                             self.cfg['datasets'][default_dataset]['categories'],
-                                             default_dataset)
+                                             self.cfg['dataset']['categories'],
+                                             dataset_name)
                 TextClassificationServer.classifiers[classifier_name] = classifier
 
-    @property
-    def host(self):
-        return self.__host
+    def start(self, address=None, port=None, timeout=None, run_forever=True):
+        """
+        :param run_forever:
+        :param address: hostname or ip address
+        :param port: TCP port
+        :param timeout: socket timeout
+        :return:
+        """
+        if address:
+            self.address = address
+        else:
+            self.address = self.cfg["address"]
+        if port:
+            self.port = port
+        else:
+            self.port = self.cfg["port"]
+        if timeout:
+            self.timeout = timeout
+        else:
+            self.timeout = self.cfg["timeout"]
 
-    @property
-    def port(self):
-        return self.__port
-
-    def start(self, run_forever=True):
         try:
-            self.server = self.ThreadedTCPServer((self.__host, self.__port),
+            self.server = self.ThreadedTCPServer((self.address, self.port),
                                                  self.ThreadedTCPRequestHandler)
-            self.server.socket.settimeout(self.__timeout)
+            self.server.socket.settimeout(self.timeout)
             self.server.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
             # Start a thread with the server -- that thread will then start one
