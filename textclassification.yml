@@ -120,7 +120,7 @@ server:
 client:
 
 training:
-  data_dir: data/output
+  result_dir: data/output
   datasets:
     <<: *datasets
     default: 20newsgroup

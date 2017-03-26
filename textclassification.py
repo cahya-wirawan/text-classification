@@ -433,7 +433,7 @@ class TextClassificationTraining(object):
         self.cfg = cfg
 
         try:
-            os.makedirs(self.cfg["data_dir"], exist_ok=True)
+            os.makedirs(self.cfg["result_dir"], exist_ok=True)
         except OSError as err:
             self.logger.error("OS error: {0}".format(err))
 
@@ -473,12 +473,12 @@ class TextClassificationTraining(object):
         TCT = TextClassificationTraining
         if classifier_name == "all":
             for classifier_name in TCT.classifiers:
-                result_name = "{}/{}_{}_{}".format(self.cfg["data_dir"], classifier_name, dataset_name, now)
+                result_name = "{}/{}_{}_{}".format(self.cfg["result_dir"], classifier_name, dataset_name, now)
                 TCT.classifiers[classifier_name]["class"].fit(dataset, result_name)
                 print("The training of {} classifier for the dataset {} is done.".format(classifier_name, dataset_name))
                 print("The result is saved in: {}(.pkl)".format(result_name))
         else:
-            result_name = "{}/{}_{}_{}".format(self.cfg["data_dir"], classifier_name, dataset_name, now)
+            result_name = "{}/{}_{}_{}".format(self.cfg["result_dir"], classifier_name, dataset_name, now)
             TCT.classifiers[classifier_name]["class"].fit(dataset, result_name)
             print("The training of {} classifier for the dataset {} is done.".format(classifier_name, dataset_name))
             print("The result is saved in: {}(.pkl)".format(result_name))
