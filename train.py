@@ -14,27 +14,29 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--classifier",
                         help="set classifier to use for the training (support currently bayesian, svm or cnn)")
-    parser.add_argument("-C", "--configuration_file", default="./textclassification.yml",
-                        help="set the configuration file")
+    parser.add_argument("-C", "--configuration_file", help="set the configuration file")
     parser.add_argument("-d", "--dataset", help="set dataset to use for the training")
     args = parser.parse_args()
 
     config_found = False
     cfg = None
-    for directory in search_directories:
-        path = os.path.join(directory, "textclassification.yml")
-        if os.path.isfile(path) and os.access(path, os.R_OK):
+    config_file_path = None
+    if args.configuration_file:
+        config_file_path = args.configuration_file
+        if os.path.isfile(config_file_path) and os.access(config_file_path, os.R_OK):
             config_found = True
-            break
+    else:
+        for directory in search_directories:
+            config_file_path = os.path.join(directory, "textclassification.yml")
+            if os.path.isfile(config_file_path) and os.access(config_file_path, os.R_OK):
+                config_found = True
+                break
     if config_found:
-        with open(args.configuration_file, 'r') as ymlfile:
+        with open(config_file_path, 'r') as ymlfile:
             cfg = yaml.load(ymlfile)
     else:
         print("The configuration file is not found.")
         exit(1)
-
-    with open(args.configuration_file, 'r') as ymlfile:
-        cfg = yaml.load(ymlfile)
 
     training = TextClassificationTraining(cfg["training"])
     training.start(cn=args.classifier, dn=args.dataset)
