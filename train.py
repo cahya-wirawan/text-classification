@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-
+import os.path
 import logging
 import yaml
 import argparse
@@ -8,6 +8,7 @@ from setup_logging import setup_logging
 
 
 if __name__ == "__main__":
+    search_directories = [".", "/etc/textclassification"]
     setup_logging()
     logger = logging.getLogger(__name__)
     parser = argparse.ArgumentParser()
@@ -17,6 +18,21 @@ if __name__ == "__main__":
                         help="set the configuration file")
     parser.add_argument("-d", "--dataset", help="set dataset to use for the training")
     args = parser.parse_args()
+
+    config_found = False
+    cfg = None
+    for directory in search_directories:
+        path = os.path.join(directory, "textclassification.yml")
+        if os.path.isfile(path) and os.access(path, os.R_OK):
+            config_found = True
+            break
+    if config_found:
+        with open(args.configuration_file, 'r') as ymlfile:
+            cfg = yaml.load(ymlfile)
+    else:
+        print("The configuration file is not found.")
+        exit(1)
+
     with open(args.configuration_file, 'r') as ymlfile:
         cfg = yaml.load(ymlfile)
 

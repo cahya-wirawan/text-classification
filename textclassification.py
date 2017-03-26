@@ -432,6 +432,11 @@ class TextClassificationTraining(object):
         self.logger = logging.getLogger(__name__)
         self.cfg = cfg
 
+        try:
+            os.makedirs(self.cfg["data_dir"], exist_ok=True)
+        except OSError as err:
+            self.logger.error("OS error: {0}".format(err))
+
         for classifier_name in self.cfg["classifiers"]:
             if classifier_name == "default":
                 continue

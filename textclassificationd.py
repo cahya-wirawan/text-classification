@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+import os.path
 import logging
 import yaml
 import argparse
@@ -8,7 +8,7 @@ from textclassification import TextClassificationServer
 
 
 if __name__ == "__main__":
-    # Port 0 means to select an arbitrary unused port
+    search_directories = [".", "/etc/textclassification"]
     setup_logging()
     logger = logging.getLogger(__name__)
     parser = argparse.ArgumentParser()
@@ -18,8 +18,21 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--port", help="define the port number which the server uses to listen")
     parser.add_argument("-t", "--timeout", type=float, help="define the port number which the server uses to listen")
     args = parser.parse_args()
-    with open(args.configuration_file, 'r') as ymlfile:
-        cfg = yaml.load(ymlfile)
+
+    config_found = False
+    cfg = None
+    for directory in search_directories:
+        path = os.path.join(directory, "textclassification.yml")
+        if os.path.isfile(path) and os.access(path, os.R_OK):
+            config_found = True
+            break
+    if config_found:
+        with open(args.configuration_file, 'r') as ymlfile:
+            cfg = yaml.load(ymlfile)
+    else:
+        print("The configuration file is not found.")
+        exit(1)
+
     tcs = TextClassificationServer(cfg=cfg["server"])
     try:
         logger.info("Server start")
