@@ -14,18 +14,18 @@ word_embeddings: &word_embeddings
 classifiers: &classifiers
   bayesian:
     enabled: True
-    training_file:
+    pre_trained_file:
       mrpolarity: data/input/bayesian_mrpolarity_20170323_142422.pkl
       20newsgroup: data/input/bayesian_20newsgroup_20170323_142449.pkl
   svm:
     enabled: True
-    training_file:
+    pre_trained_file:
       mrpolarity:  data/input/svm_mrpolarity_20170323_142422.pkl
       20newsgroup: data/input/svm_20newsgroup_20170323_142449.pkl
   cnn:
     enabled: True
     batch_size: 64
-    training_dir:
+    pre_trained_dir:
       mrpolarity: data/input/cnn_mrpolarity_20170301_090000
       20newsgroup: data/input/cnn_20newsgroup_20170301_090000
     dev_sample_percentage: 0.1

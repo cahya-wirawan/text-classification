@@ -13,7 +13,7 @@ class ClassifierSvm(Classifier):
         self.categories = categories
         self.current_category = current_category
         if load:
-            self.clf = joblib.load(cfg['training_file'][self.current_category])
+            self.clf = joblib.load(cfg['pre_trained_file'][self.current_category])
 
     def fit(self, dataset, filename):
         self.logger.debug("fit")

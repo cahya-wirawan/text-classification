@@ -103,10 +103,10 @@ class TextCNNEvaluator(object):
         self.x_raw = None
         self.x_test = None
         # Map data into vocabulary
-        self.vocab_path = os.path.join(self.cfg['training_dir'][self.current_category], "vocab")
+        self.vocab_path = os.path.join(self.cfg['pre_trained_dir'][self.current_category], "vocab")
         self.vocab_processor = learn.preprocessing.VocabularyProcessor.restore(self.vocab_path)
 
-        checkpoint_file = tf.train.latest_checkpoint(self.cfg['training_dir'][self.current_category] + "/checkpoints")
+        checkpoint_file = tf.train.latest_checkpoint(self.cfg['pre_trained_dir'][self.current_category] + "/checkpoints")
         graph = tf.Graph()
         with graph.as_default():
             session_conf = tf.ConfigProto(
