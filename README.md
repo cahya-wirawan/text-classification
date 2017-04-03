@@ -1,5 +1,5 @@
 # Text Classification
-The development this repository has been moved to [OpenTC](https://github.com/cahya-wirawan/opentc "Open Text 
+The development of this repository has been moved to [OpenTC](https://github.com/cahya-wirawan/opentc "Open Text 
 Classification"), where it becomes a python 
 package.
 
