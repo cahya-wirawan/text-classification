@@ -1,4 +1,8 @@
 # Text Classification
+The development this repository has been moved to [OpenTC](https://github.com/cahya-wirawan/opentc "Open Text 
+Classification"), where it becomes a python 
+package.
+
 This is a text classification engine using several algorithms in machine learning. Following algorithms will be 
 supported:
 - Naive Bayes (Scikit-learn)
